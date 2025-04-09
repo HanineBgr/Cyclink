@@ -5,7 +5,6 @@ import 'package:fast_rhino/common_widget/round_textfield.dart';
 import 'package:fast_rhino/view/login/complete_profile_view.dart';
 import 'package:flutter/material.dart';
 
-
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
 

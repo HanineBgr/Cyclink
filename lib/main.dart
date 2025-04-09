@@ -1,11 +1,14 @@
 import 'package:fast_rhino/view/on_boarding/on_boarding_view.dart';
 import 'package:fast_rhino/view/main_tab/main_tab_view.dart';
 import 'package:fast_rhino/view/on_boarding/on_boarding_view.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart'; // Import GetX
 import 'common/colo_extension.dart';
 
-void main()  {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 

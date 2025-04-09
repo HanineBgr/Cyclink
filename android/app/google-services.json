@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "221849854262",
+    "project_id": "set-up-63b19",
+    "storage_bucket": "set-up-63b19.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:221849854262:android:053ad3d9b5c32739511397",
+        "android_client_info": {
+          "package_name": "com.example.fast_rhino"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB6JuG1oz3imq71GdbAuClAuf8i0RVA9mI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
