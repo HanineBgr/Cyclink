@@ -19,6 +19,7 @@ class HeartRateCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
+      color: Colors.white, // Fixed card color to white
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -46,7 +47,6 @@ class HeartRateCard extends StatelessWidget {
   }
 
   Widget _buildZoneBar() {
-    // Répartition égale des zones sans pourcentage fixe
     return ClipRRect(
       borderRadius: BorderRadius.circular(4),
       child: Row(

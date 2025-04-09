@@ -49,7 +49,7 @@ class _BeforeSessionScreenState extends State<BeforeSessionScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Training session"),
-        backgroundColor: TColor.white,
+        backgroundColor: Colors.white,
         centerTitle: true,
         elevation: 0,
         leading: InkWell(

@@ -15,7 +15,7 @@ class SessionSummaryScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: TColor.white,
+        backgroundColor: Colors.white,
         centerTitle: true,
         elevation: 0,
         leading: InkWell(

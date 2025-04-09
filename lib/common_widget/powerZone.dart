@@ -21,6 +21,7 @@ class PowerZoneCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
+      color: Colors.white, // Fixed card color to white
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

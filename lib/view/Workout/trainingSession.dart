@@ -67,9 +67,9 @@ class _TrainingSessionScreenState extends State<TrainingSessionScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      backgroundColor: isDark ? Colors.black : theme.scaffoldBackgroundColor, // Dark mode background
+      backgroundColor: Colors.white, // Dark mode background
       appBar: AppBar(
-        backgroundColor: isDark ? Colors.black : theme.scaffoldBackgroundColor, // Dark mode app bar
+        backgroundColor:  Colors.white,
         centerTitle: true,
         elevation: 0,
         leading: IconButton(
