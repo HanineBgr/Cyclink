@@ -1,12 +1,12 @@
-import 'package:fast_rhino/view/Workout/beforeSession.dart';
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:fast_rhino/common_widget/workout_card.dart';
+import 'package:fast_rhino/models/workout.dart';
+import 'package:fast_rhino/services/zwo_parser.dart';
 import '../../common/colo_extension.dart';
 import '../../common_widget/metrics_row.dart';
 import '../../common_widget/power_chart.dart';
 import '../../common_widget/range_slider.dart';
 import '../../common_widget/round_button.dart';
-import '../../common_widget/workout_card.dart';
 
 class WorkoutLibrary extends StatefulWidget {
   final Map eObj;
@@ -20,48 +20,25 @@ class WorkoutLibrary extends StatefulWidget {
 class _WorkoutLibraryState extends State<WorkoutLibrary> {
   TextEditingController txtSearch = TextEditingController();
 
-  List categoryArr = [
-    {"name": "Salad", "image": "assets/img/c_1.png"},
-    {"name": "Cake", "image": "assets/img/c_2.png"},
-    {"name": "Pie", "image": "assets/img/c_3.png"},
-    {"name": "Smoothies", "image": "assets/img/c_4.png"},
+  final List<String> workoutFiles = [
+    'assets/workouts/Foundation_Builder.zwo',
+    'assets/workouts/Power_Endurance.zwo',
+    // Add paths to your ZWO files
   ];
+  final double ftp = 255; // Set your FTP value here
 
-  List popularArr = [
-    {
-      "name": "Blueberry Pancake",
-      "image": "assets/img/f_1.png",
-      "b_image": "assets/img/pancake_1.png",
-      "size": "Medium",
-      "time": "30mins",
-      "kcal": "230kCal"
-    },
-    {
-      "name": "Salmon Nigiri",
-      "image": "assets/img/f_2.png",
-      "b_image": "assets/img/nigiri.png",
-      "size": "Medium",
-      "time": "20mins",
-      "kcal": "120kCal"
-    },
-  ];
+  Future<Workout> _loadWorkout(String path) async {
+    return await loadWorkout(path);
+  }
 
-  List recommendArr = [
-    {
-      "name": "Honey Pancake",
-      "image": "assets/img/rd_1.png",
-      "size": "Easy",
-      "time": "30mins",
-      "kcal": "180kCal"
-    },
-    {
-      "name": "Canai Bread",
-      "image": "assets/img/m_4.png",
-      "size": "Easy",
-      "time": "20mins",
-      "kcal": "230kCal"
-    },
-  ];
+  Future<List<Workout>> _loadAllWorkouts() async {
+    List<Workout> workouts = [];
+    for (var path in workoutFiles) {
+      final workout = await _loadWorkout(path);
+      workouts.add(workout);
+    }
+    return workouts;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -202,8 +179,7 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5),
               child: Text(
-                widget.eObj["description"] ??
-                    "The 8 minute Functional Threshold Power (FTP) test offers an alternative means of calculating FTP.",
+                widget.eObj["description"] ?? "The 8 minute Functional Threshold Power (FTP) test offers an alternative means of calculating FTP.",
                 style: TextStyle(
                     color: Colors.grey.withOpacity(0.8),
                     fontSize: 14,
@@ -222,8 +198,6 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
             ),
             PowerChart(),
 
-            //SizedBox(height:1),
-
             //// Metrics Section ////
             WorkoutMetricsRow(),
 
@@ -236,58 +210,71 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
                 height: 25,
                 title: "Start Session",
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => BeforeSessionScreen(
-                        eObj: widget.eObj,
-                      ),
-                    ),
-                  );
-                }, 
+                  // Add your start session logic
+                },
               ),
             ),
             SizedBox(height: media.width * 0.05),
-CustomRangeSlider(
-  title: "TSS Range: 0–200",
-  min: 0,
-  max: 200,
-  initialValue: 100,
-  labels: ["Regular", "Low", "High", "Very high"],
-  activeColor: TColor.primaryColor1,
-  onChanged: (value) {
-    print("TSS: $value");
-  },
-),
-const SizedBox(height: 24),
-CustomRangeSlider(
-  title: "Duration range 0–180 min",
-  min: 0,
-  max: 180,
-  initialValue: 90,
-  labels: ["Short", "Medium", "Long", "Epic"],
-  activeColor: TColor.secondaryColor2,
-  onChanged: (value) {
-    print("Duration: $value");
-  },
-),
+
+            CustomRangeSlider(
+              title: "TSS Range: 0–200",
+              min: 0,
+              max: 200,
+              initialValue: 100,
+              labels: ["Regular", "Low", "High", "Very high"],
+              activeColor: TColor.primaryColor1,
+              onChanged: (value) {
+                print("TSS: $value");
+              },
+            ),
+            const SizedBox(height: 24),
+            CustomRangeSlider(
+              title: "Duration range 0–180 min",
+              min: 0,
+              max: 180,
+              initialValue: 90,
+              labels: ["Short", "Medium", "Long", "Epic"],
+              activeColor: TColor.secondaryColor2,
+              onChanged: (value) {
+                print("Duration: $value");
+              },
+            ),
+
+            // Load Workouts Section
             SizedBox(height: media.width * 0.02),
-           // found workouts Section
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
-              child: Text("6 workout found",
+              child: Text("Available Workouts",
                   style: TextStyle(
                       color: TColor.black,
                       fontSize: 16,
                       fontWeight: FontWeight.bold)),
             ),
-            SizedBox(height: media.width * 0.02),
-            // Workout List 
-            WorkoutCard(duration: '60min', subtitle: 'Solid sweet spot intervals with recovery ', title: 'Sweet spot builder ', tss: '75',),
-            SizedBox(height: media.height * 0.02),
-            WorkoutCard(duration: '60min', subtitle: 'Building base fitness  ', title: 'Endurance ride ', tss: '75',),
-            ],
-                  
+
+            // Dynamic Workout Cards
+            FutureBuilder<List<Workout>>(
+              future: _loadAllWorkouts(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(child: Text('No workouts available'));
+                } else {
+                  final workouts = snapshot.data!;
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: workouts.length,
+                    itemBuilder: (context, index) {
+                      return WorkoutCard(workout: workouts[index], );
+                    },
+                  );
+                }
+              },
+            ),
+          ],
         ),
       ),
     );

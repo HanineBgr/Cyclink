@@ -13,7 +13,7 @@ class BLEService {
 
   // Scanner les périphériques BLE
   Stream<List<ScanResult>> scanDevices() {
-    FlutterBluePlus.startScan(timeout: Duration(seconds: 5));
+    FlutterBluePlus.startScan(timeout: Duration(seconds: 15));
     return FlutterBluePlus.scanResults;
   }
 
@@ -49,7 +49,6 @@ class BLEService {
       ftmsCharacteristic!.setNotifyValue(true);
       ftmsCharacteristic!.value.listen((value) {
         print('Données FTMS reçues : $value');
-        // Ajouter ici le parsing des données si nécessaire
       });
     }
   }
