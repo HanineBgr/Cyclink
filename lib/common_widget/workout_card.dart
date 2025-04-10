@@ -33,7 +33,10 @@ class WorkoutCard extends StatelessWidget {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 8),
-          //WorkoutChart(workout: workout),
+         WorkoutChart(
+                    segments: workout.toSegments(),
+                    totalDuration: workout.totalDuration.toDouble(),
+                  ),
           SizedBox(height: 8),
           Text(workout.description),
           SizedBox(height: 8),
