@@ -1,11 +1,14 @@
+// 📁 lib/services/auth/auth_service.dart
 import 'dart:convert';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:fast_rhino/models/user/user.dart';
 
 class AuthService {
-  /// Change this baseUrl to your backend address.
   static const String baseUrl = 'http://192.168.1.13:5000';
+  static final FlutterSecureStorage _storage = FlutterSecureStorage();
 
-  /// Sign Up API Call
+  /// Sign Up
   static Future<Map<String, dynamic>> signUp({
     required String email,
     required String name,
@@ -46,7 +49,7 @@ class AuthService {
     }
   }
 
-  /// Sign In API Call
+  /// Sign In
   static Future<Map<String, dynamic>> signIn({
     required String email,
     required String password,
@@ -62,10 +65,43 @@ class AuthService {
     );
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      final data = jsonDecode(response.body);
+      await _storage.write(key: 'token', value: data['token']);
+      return data;
     } else {
       final errorData = jsonDecode(response.body);
       throw Exception(errorData['message'] ?? 'Sign-in failed');
     }
+  }
+
+  /// Fetch Current User
+  static Future<User> fetchUser({required String token}) async {
+  final url = Uri.parse('$baseUrl/user');
+
+  final response = await http.get(
+    url,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+  );
+
+  final responseBody = jsonDecode(response.body);
+
+  if (response.statusCode == 200) {
+    if (responseBody['user'] == null) {
+      throw Exception("User data is missing");
+    }
+
+    return User.fromJson(responseBody['user']);
+  } else {
+    throw Exception(responseBody['message'] ?? 'Failed to fetch user');
+  }
+}
+
+
+  /// Sign Out
+  static Future<void> signOut() async {
+    await _storage.delete(key: 'token');
   }
 }
