@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/workout_segment.dart';
+import '../models/workout/workout_segment.dart';
 
 class WorkoutChart extends StatelessWidget {
   final List<WorkoutSegment> segments;

@@ -1,9 +1,10 @@
+import 'package:fast_rhino/models/workout/workoutInterval.dart';
+import 'package:fast_rhino/models/workout/workout_segment.dart';
+import 'package:fast_rhino/models/workout/workout_step.dart';
 import 'package:flutter/material.dart';
 import 'package:xml/xml.dart';
+        
 
-import 'workoutInterval.dart';      
-import 'workout_step.dart';         
-import 'workout_segment.dart';      
 
 class Workout {
   final String name;

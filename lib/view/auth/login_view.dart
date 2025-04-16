@@ -1,9 +1,9 @@
-
+import 'package:flutter/material.dart';
 import 'package:fast_rhino/common/colo_extension.dart';
 import 'package:fast_rhino/common_widget/round_button.dart';
 import 'package:fast_rhino/common_widget/round_textfield.dart';
-import 'package:fast_rhino/view/login/complete_profile_view.dart';
-import 'package:flutter/material.dart';
+import 'package:fast_rhino/view/auth/signUp1.dart';
+import 'package:fast_rhino/view/home/home_view.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -14,94 +14,132 @@ class LoginView extends StatefulWidget {
 
 class _LoginViewState extends State<LoginView> {
   bool isCheck = false;
+  bool _isPasswordVisible = false; 
 
-  // Google Sign-In logic
- 
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  Widget buildLabel(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: RichText(
+        text: TextSpan(
+          text: text,
+          style: TextStyle(color: TColor.primaryColor1, fontSize: 13),
+          children: const [
+            TextSpan(
+              text: ' *',
+              style: TextStyle(color: Colors.red),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: TColor.white,
       body: SingleChildScrollView(
         child: SafeArea(
           child: Container(
             height: media.height * 0.9,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.fromLTRB(20, 50, 20, 0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Hey there,", style: TextStyle(color: TColor.gray, fontSize: 16)),
-                Text("Welcome Back",
+                Text("Welcome",
                     style: TextStyle(
                         color: TColor.black,
-                        fontSize: 20,
+                        fontSize: 30,
                         fontWeight: FontWeight.w700)),
+                Text("Sign up or Login to your Account",
+                    style: TextStyle(color: TColor.gray, fontSize: 16)),
+
                 SizedBox(height: media.width * 0.05),
-                const RoundTextField(
-                  hitText: "Email",
+
+                buildLabel("Email"),
+                RoundTextField(
+                  hitText: "Enter your email",
                   icon: "assets/img/email.png",
+                  controller: emailController,
                   keyboardType: TextInputType.emailAddress,
                 ),
+
                 SizedBox(height: media.width * 0.04),
+
+                buildLabel("Password"),
                 RoundTextField(
-                  hitText: "Password",
+                  hitText: "Enter your password",
                   icon: "assets/img/lock.png",
-                  obscureText: true,
-                  rigtIcon: TextButton(
-                    onPressed: () {},
-                    child: Container(
-                      alignment: Alignment.center,
-                      width: 20,
-                      height: 20,
-                      child: Image.asset(
-                        "assets/img/show_password.png",
-                        width: 20,
-                        height: 20,
-                        fit: BoxFit.contain,
-                        color: TColor.gray,
-                      ),
+                  obscureText: !_isPasswordVisible, // 👈 control visibility
+                  controller: passwordController,
+                  rigtIcon: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _isPasswordVisible = !_isPasswordVisible;
+                      });
+                    },
+                    icon: Icon(
+                      _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                      color: TColor.gray,
+                      size: 20,
                     ),
                   ),
                 ),
+
+                SizedBox(height: media.width * 0.01),
+
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text("Forgot your password?",
                         style: TextStyle(
                             color: TColor.gray,
-                            fontSize: 10,
+                            fontSize: 12,
                             decoration: TextDecoration.underline)),
                   ],
                 ),
-                const Spacer(),
+                SizedBox(height: media.width * 0.08),
+
                 RoundButton(
-                    title: "Login",
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const CompleteProfileView(),
-                        ),
-                      );
-                    }),
+                  title: "Login",
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const HomeViewScreen(),
+                      ),
+                    );
+                  },
+                ),
+
                 SizedBox(height: media.width * 0.04),
+
                 Row(
                   children: [
                     Expanded(
-                        child: Container(
-                      height: 1,
-                      color: TColor.gray.withOpacity(0.5),
-                    )),
+                      child: Container(
+                        height: 1,
+                        color: TColor.gray.withOpacity(0.5),
+                      ),
+                    ),
                     Text("  Or  ",
                         style: TextStyle(color: TColor.black, fontSize: 12)),
                     Expanded(
-                        child: Container(
-                      height: 1,
-                      color: TColor.gray.withOpacity(0.5),
-                    )),
+                      child: Container(
+                        height: 1,
+                        color: TColor.gray.withOpacity(0.5),
+                      ),
+                    ),
                   ],
                 ),
+
                 SizedBox(height: media.width * 0.04),
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -127,7 +165,7 @@ class _LoginViewState extends State<LoginView> {
                     SizedBox(width: media.width * 0.04),
                     GestureDetector(
                       onTap: () {
-                        // Facebook sign-in can be added here
+                        // Future: Add Strava logic
                       },
                       child: Container(
                         width: 50,
@@ -140,7 +178,7 @@ class _LoginViewState extends State<LoginView> {
                           borderRadius: BorderRadius.circular(15),
                         ),
                         child: Image.asset(
-                          "assets/img/facebook.png",
+                          "assets/img/strava_logo.png",
                           width: 20,
                           height: 20,
                         ),
@@ -148,25 +186,32 @@ class _LoginViewState extends State<LoginView> {
                     )
                   ],
                 ),
+
                 SizedBox(height: media.width * 0.04),
+
                 TextButton(
                   onPressed: () {
-                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SignUpView(),
+                      ),
+                    );
                   },
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text("Don’t have an account yet?",
-                          style:
-                              TextStyle(color: TColor.black, fontSize: 14)),
+                          style: TextStyle(color: TColor.black, fontSize: 14)),
                       Text(" Register",
                           style: TextStyle(
-                              color: TColor.black,
+                              color: TColor.secondaryColor1,
                               fontSize: 14,
                               fontWeight: FontWeight.w700))
                     ],
                   ),
                 ),
+
                 SizedBox(height: media.width * 0.04),
               ],
             ),

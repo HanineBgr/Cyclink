@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fast_rhino/models/workout.dart';
+import 'package:fast_rhino/models/workout/workout.dart';
 import 'package:fast_rhino/common_widget/workout_chart.dart';
 
 class WorkoutCard extends StatelessWidget {
@@ -28,18 +28,23 @@ class WorkoutCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+           WorkoutChart(
+                    segments: workout.toSegments(),
+                    totalDuration: workout.totalDuration.toDouble(),
+                  ),
           Text(
             workout.name,
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 8),
-         WorkoutChart(
-                    segments: workout.toSegments(),
-                    totalDuration: workout.totalDuration.toDouble(),
-                  ),
+          SizedBox(height: 5),
+         Text(
+            workout.author,
+            style: TextStyle(fontSize: 14, ),
+          ),
           SizedBox(height: 8),
           Text(workout.description),
           SizedBox(height: 8),
+          
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

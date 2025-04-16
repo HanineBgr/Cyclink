@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fast_rhino/common_widget/workout_card.dart';
-import 'package:fast_rhino/models/workout.dart';
+import 'package:fast_rhino/models/workout/workout.dart';
 import 'package:fast_rhino/services/zwo_parser.dart';
 import '../../common/colo_extension.dart';
 import '../../common_widget/metrics_row.dart';

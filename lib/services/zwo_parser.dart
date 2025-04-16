@@ -1,5 +1,5 @@
 // lib/services/zwo_parser.dart
-import 'package:fast_rhino/models/workout.dart';
+import 'package:fast_rhino/models/workout/workout.dart';
 import 'package:flutter/services.dart' as rootBundle;
 import 'package:xml/xml.dart';
 
