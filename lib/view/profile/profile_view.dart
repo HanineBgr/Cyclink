@@ -6,7 +6,7 @@ import '../../common_widget/profileCard.dart';
 import '../../common_widget/round_button.dart';
 import '../../common_widget/setting_row.dart';
 import '../../common_widget/title_subtitle_cell.dart';
-import '../../provider/auth_provider.dart';
+import '../../providers/auth_provider.dart';
 
 class ProfileView extends StatefulWidget {
   const ProfileView({super.key});

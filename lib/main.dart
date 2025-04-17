@@ -1,7 +1,8 @@
+import 'package:fast_rhino/providers/workout_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
-import 'provider/auth_provider.dart'; 
+import 'providers/auth_provider.dart'; 
 import 'package:firebase_core/firebase_core.dart';
 
 import 'common/colo_extension.dart';
@@ -21,6 +22,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()), 
+        ChangeNotifierProvider(create: (_) => WorkoutProvider()),
       ],
       child: GetMaterialApp(
         title: 'Fitness 3 in 1',

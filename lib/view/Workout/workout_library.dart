@@ -1,7 +1,8 @@
+import 'package:fast_rhino/providers/workout_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:fast_rhino/common_widget/workout_card.dart';
 import 'package:fast_rhino/models/workout/workout.dart';
-import 'package:fast_rhino/services/zwo_parser.dart';
 import '../../common/colo_extension.dart';
 import '../../common_widget/metrics_row.dart';
 import '../../common_widget/power_chart.dart';
@@ -20,29 +21,17 @@ class WorkoutLibrary extends StatefulWidget {
 class _WorkoutLibraryState extends State<WorkoutLibrary> {
   TextEditingController txtSearch = TextEditingController();
 
-  final List<String> workoutFiles = [
-    'assets/workouts/Foundation_Builder.zwo',
-    'assets/workouts/Power_Endurance.zwo',
-    // Add paths to your ZWO files
-  ];
-  final double ftp = 255; // Set your FTP value here
-
-  Future<Workout> _loadWorkout(String path) async {
-    return await loadWorkout(path);
-  }
-
-  Future<List<Workout>> _loadAllWorkouts() async {
-    List<Workout> workouts = [];
-    for (var path in workoutFiles) {
-      final workout = await _loadWorkout(path);
-      workouts.add(workout);
-    }
-    return workouts;
+  @override
+  void initState() {
+    super.initState();
+    Provider.of<WorkoutProvider>(context, listen: false).fetchWorkouts();
   }
 
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
+    final workoutProvider = Provider.of<WorkoutProvider>(context);
+    final workouts = workoutProvider.workouts;
 
     return Scaffold(
       appBar: AppBar(
@@ -102,7 +91,7 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Search Bar
+            // 🔍 Search Bar
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 20),
               padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -153,7 +142,7 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
 
             SizedBox(height: media.width * 0.05),
 
-            // Title Section
+            // 🏷️ Title
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Text(
@@ -165,7 +154,8 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
               ),
             ),
             SizedBox(height: media.width * 0.02),
-            // Description
+
+            // 📝 Description
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Text(
@@ -177,9 +167,11 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5),
               child: Text(
-                widget.eObj["description"] ?? "The 8 minute Functional Threshold Power (FTP) test offers an alternative means of calculating FTP.",
+                widget.eObj["description"] ??
+                    "The 8 minute Functional Threshold Power (FTP) test offers an alternative means of calculating FTP.",
                 style: TextStyle(
                     color: Colors.grey.withOpacity(0.8),
                     fontSize: 14,
@@ -187,9 +179,10 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
               ),
             ),
 
-            // === Power Chart Starts Here ===
+            // 📊 Power Graph Placeholder
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
               child: Text("Power",
                   style: TextStyle(
                       color: TColor.black,
@@ -198,24 +191,24 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
             ),
             PowerChart(),
 
-            //// Metrics Section ////
+            // 🔢 Workout Metrics
             WorkoutMetricsRow(),
-
             SizedBox(height: media.width * 0.02),
 
-            /// Start Button Section ///
+            // ▶️ Start Button
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: RoundButton(
                 height: 25,
                 title: "Start Session",
                 onPressed: () {
-                  // Add your start session logic
+                  // start session logic
                 },
               ),
             ),
             SizedBox(height: media.width * 0.05),
 
+            // 🎚️ Range Sliders
             CustomRangeSlider(
               title: "TSS Range: 0–200",
               min: 0,
@@ -240,10 +233,11 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
               },
             ),
 
-            // Load Workouts Section
+            // 📂 Loaded Workouts Section
             SizedBox(height: media.width * 0.02),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
               child: Text("Available Workouts",
                   style: TextStyle(
                       color: TColor.black,
@@ -251,29 +245,16 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
                       fontWeight: FontWeight.bold)),
             ),
 
-            // Dynamic Workout Cards
-            FutureBuilder<List<Workout>>(
-              future: _loadAllWorkouts(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(child: Text('No workouts available'));
-                } else {
-                  final workouts = snapshot.data!;
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    itemCount: workouts.length,
-                    itemBuilder: (context, index) {
-                      return WorkoutCard(workout: workouts[index], );
-                    },
-                  );
-                }
-              },
-            ),
+            if (workoutProvider.isLoading)
+              const Center(child: CircularProgressIndicator())
+            else if (workouts.isEmpty)
+              const Center(child: Text("No workouts available"))
+            else
+              Column(
+                children: workouts
+                    .map((workout) => WorkoutCard(workout: workout))
+                    .toList(),
+              ),
           ],
         ),
       ),

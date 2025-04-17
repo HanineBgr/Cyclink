@@ -1,4 +1,4 @@
-import 'package:fast_rhino/services/bluetooth_service.dart';
+import 'package:fast_rhino/services/bluetooth/bluetooth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'dart:math' as math;

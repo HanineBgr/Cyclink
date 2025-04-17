@@ -1,7 +1,7 @@
 import 'package:fast_rhino/common/colo_extension.dart';
 import 'package:fast_rhino/common_widget/round_button.dart';
 import 'package:fast_rhino/common_widget/round_textfield.dart';
-import 'package:fast_rhino/provider/auth_provider.dart';
+import 'package:fast_rhino/providers/auth_provider.dart';
 import 'package:fast_rhino/view/auth/login_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
