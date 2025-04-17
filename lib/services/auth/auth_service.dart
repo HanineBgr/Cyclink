@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:fast_rhino/models/user/user.dart';
 
 class AuthService {
-  static const String baseUrl = 'http://192.168.1.13:5000';
+  static const String baseUrl = 'https://backend-izlg.onrender.com';
   static final FlutterSecureStorage _storage = FlutterSecureStorage();
 
   /// Sign Up

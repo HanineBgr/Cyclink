@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import '../models/Workout/workout.dart';
 
 // 🌍 Base URL à modifier si nécessaire
-const String baseUrl = 'http://192.168.1.13:5000';
+const String baseUrl = 'https://backend-izlg.onrender.com';
 
 class WorkoutProvider with ChangeNotifier {
   List<Workout> _workouts = [];
@@ -45,7 +45,7 @@ Future<void> filterWorkouts({
 
   try {
     final uri = Uri.parse(
-        'http://192.168.1.13:5000/workouts/filter?minTss=$minTss&maxTss=$maxTss&minDuration=$minDuration&maxDuration=$maxDuration');
+        '$baseUrl/workouts/filter?minTss=$minTss&maxTss=$maxTss&minDuration=$minDuration&maxDuration=$maxDuration');
 
     final response = await http.get(uri);
 
