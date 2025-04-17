@@ -1,5 +1,7 @@
 import 'package:fast_rhino/common_widget/tss_chart.dart';
+import 'package:fast_rhino/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../common_widget/performance_chart.dart';
 import '../../common_widget/recent_activities.dart';
 import '../../common_widget/training_status.dart';
@@ -9,7 +11,9 @@ class HomeViewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
+    final authProvider = Provider.of<AuthProvider>(context);
+    final userName = authProvider.user?.name ?? 'Rhino boss';
+
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     double paddingValue = screenWidth * 0.05;
@@ -23,7 +27,7 @@ class HomeViewScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SizedBox(height: screenHeight * 0.05),
-            _buildHeader(),
+            _buildHeader(userName),
             SizedBox(height: screenHeight * 0.02),
             _buildCenteredWidget(TrainingStatus(), maxWidth),
             SizedBox(height: screenHeight * 0.02),
@@ -76,14 +80,14 @@ class HomeViewScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
-    return const ListTile(
-      leading: CircleAvatar(
+  Widget _buildHeader(String userName) {
+    return ListTile(
+      leading: const CircleAvatar(
         backgroundImage: AssetImage('assets/img/u1.png'),
       ),
       title: Text(
-        'Welcome Rhino boss!',
-        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        'Welcome $userName!',
+        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
       ),
     );
   }

@@ -30,43 +30,55 @@ class _SignUp2ScreenState extends State<SignUp2Screen> {
   final TextEditingController heightController = TextEditingController();
   final TextEditingController ftpController = TextEditingController();
 
-
   bool isLoading = false;
   String? errorMessage;
 
- Future<void> showSuccessDialog(BuildContext context) async {
-  await showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (_) => AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      title: Row(
-        children: const [
-          Icon(Icons.check_circle, color: Colors.green, size: 26),
-          SizedBox(width: 8),
-          Text("Account Created"),
+  Future<void> _selectDate(BuildContext context) async {
+    DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime(2000),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        dateOfBirthController.text = picked.toIso8601String().split("T")[0];
+      });
+    }
+  }
+
+  Future<void> showSuccessDialog(BuildContext context) async {
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: const [
+            Icon(Icons.check_circle, color: Colors.green, size: 26),
+            SizedBox(width: 8),
+            Text("Account Created"),
+          ],
+        ),
+        content: const Text(
+          "Your account has been created successfully!",
+          style: TextStyle(fontSize: 16),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginView()),
+              );
+            },
+            child: const Text("OK", style: TextStyle(fontSize: 14)),
+          ),
         ],
       ),
-      content: const Text(
-        "Your account has been created successfully!",
-        style: TextStyle(fontSize: 16),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.pop(context);
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const LoginView()),
-            );
-          },
-          child: const Text("OK", style: TextStyle(fontSize: 14)),
-        ),
-      ],
-    ),
-  );
-}
-
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,11 +108,16 @@ class _SignUp2ScreenState extends State<SignUp2Screen> {
                     style: TextStyle(color: TColor.gray, fontSize: 12)),
                 SizedBox(height: media.width * 0.05),
 
-                /// DATE OF BIRTH
-                RoundTextField(
-                  hitText: "Date of Birth (YYYY-MM-DD)",
-                  icon: "assets/img/date.png",
-                  controller: dateOfBirthController,
+                /// DATE OF BIRTH (Calendar Picker)
+                GestureDetector(
+                  onTap: () => _selectDate(context),
+                  child: AbsorbPointer(
+                    child: RoundTextField(
+                      hitText: "Date of Birth (YYYY-MM-DD)",
+                      icon: "assets/img/date.png",
+                      controller: dateOfBirthController,
+                    ),
+                  ),
                 ),
                 SizedBox(height: media.width * 0.04),
 
@@ -163,7 +180,6 @@ class _SignUp2ScreenState extends State<SignUp2Screen> {
                   controller: ftpController,
                   keyboardType: TextInputType.number,
                 ),
-            
                 SizedBox(height: media.width * 0.04),
 
                 /// Error
@@ -202,7 +218,7 @@ class _SignUp2ScreenState extends State<SignUp2Screen> {
                               dateOfBirth: dob,
                               weight: weight,
                               height: height,
-                              ftp: ftp,                           
+                              ftp: ftp,
                               preferences: {},
                             );
 

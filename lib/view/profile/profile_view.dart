@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../../common/colo_extension.dart';
 import '../../common_widget/profileCard.dart';
 import '../../common_widget/round_button.dart';
@@ -28,7 +27,7 @@ class _ProfileViewState extends State<ProfileView> {
     final user = authProvider.user;
 
     return Scaffold(
-      appBar: AppBar(
+     appBar: AppBar(
         backgroundColor: TColor.white,
         centerTitle: true,
         elevation: 0,
@@ -36,14 +35,17 @@ class _ProfileViewState extends State<ProfileView> {
         title: Text("Profile", style: TextStyle(color: TColor.black, fontSize: 16, fontWeight: FontWeight.w700)),
         actions: [
           InkWell(
-            onTap: () {},
+            onTap: () async {
+              await Provider.of<AuthProvider>(context, listen: false).signOut();
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            },
             child: Container(
               margin: const EdgeInsets.all(8),
               height: 40,
               width: 40,
               alignment: Alignment.center,
               decoration: BoxDecoration(color: TColor.lightGray, borderRadius: BorderRadius.circular(10)),
-              child: Image.asset("assets/img/more_btn.png", width: 15, height: 15, fit: BoxFit.contain),
+              child: const Icon(Icons.logout, color: Colors.black, size: 20),
             ),
           )
         ],
@@ -61,7 +63,7 @@ class _ProfileViewState extends State<ProfileView> {
                       children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(30),
-                          child: Image.asset("assets/img/u1.png", width: 50, height: 50, fit: BoxFit.cover),
+                          child: Image.asset("assets/img/user.png", width: 50, height: 50, fit: BoxFit.cover),
                         ),
                         const SizedBox(width: 15),
                         Expanded(

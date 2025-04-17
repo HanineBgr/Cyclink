@@ -16,6 +16,7 @@ class SignUpView extends StatefulWidget {
 
 class _SignUpViewState extends State<SignUpView> {
   bool isCheck = false;
+  bool _isPasswordVisible = false;
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
@@ -116,70 +117,70 @@ class _SignUpViewState extends State<SignUpView> {
                 ),
                 SizedBox(height: media.width * 0.04),
                 /// GENDER FIELD (styled like RoundTextField)
-Container(
-  decoration: BoxDecoration(
-    color: TColor.lightGray,
-    borderRadius: BorderRadius.circular(15),
-  ),
-  child: Row(
-    children: [
-      Container(
-        alignment: Alignment.center,
-        width: 50,
-        height: 50,
-        padding: const EdgeInsets.symmetric(horizontal: 15),
-        child: Image.asset(
-          "assets/img/gender.png",
-          width: 20,
-          height: 20,
-          fit: BoxFit.contain,
-          color: TColor.gray,
-        ),
-      ),
-      Expanded(
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton<String>(
-            value: selectedGender,
-            isExpanded: true,
-            items: ["Male", "Female"]
-                .map((name) => DropdownMenuItem(
-                      value: name,
-                      child: Text(
-                        name,
-                        style: TextStyle(color: TColor.gray, fontSize: 14),
+                Container(
+                  decoration: BoxDecoration(
+                    color: TColor.lightGray,
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        alignment: Alignment.center,
+                        width: 50,
+                        height: 50,
+                        padding: const EdgeInsets.symmetric(horizontal: 15),
+                        child: Image.asset(
+                          "assets/img/gender.png",
+                          width: 20,
+                          height: 20,
+                          fit: BoxFit.contain,
+                          color: TColor.gray,
+                        ),
                       ),
-                    ))
-                .toList(),
-            onChanged: (value) {
-              setState(() {
-                selectedGender = value;
-              });
-            },
-            hint: Text(
-              "Choose Gender",
-              style: TextStyle(color: TColor.gray, fontSize: 12),
-            ),
-          ),
-        ),
-      ),
-      const SizedBox(width: 8),
-    ],
-  ),
-),
+                      Expanded(
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: selectedGender,
+                            isExpanded: true,
+                            items: ["Male", "Female"]
+                                .map((name) => DropdownMenuItem(
+                                      value: name,
+                                      child: Text(
+                                        name,
+                                        style: TextStyle(color: TColor.gray, fontSize: 14),
+                                      ),
+                                    ))
+                                .toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                selectedGender = value;
+                              });
+                            },
+                            hint: Text(
+                              "Choose Gender",
+                              style: TextStyle(color: TColor.gray, fontSize: 12),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                  ),
+                ),
                 SizedBox(height: media.width * 0.04),
-                RoundTextField(
-                  hitText: "Password",
+                 RoundTextField(
+                  hitText: "Enter your password",
                   icon: "assets/img/lock.png",
-                  obscureText: true,
+                  obscureText: !_isPasswordVisible,
                   controller: passwordController,
-                  rigtIcon: TextButton(
-                    onPressed: () {},
-                    child: Container(
-                      alignment: Alignment.center,
-                      width: 20,
-                      height: 20,
-                      child: Image.asset("assets/img/show_password.png",
-                          width: 20, height: 20, fit: BoxFit.contain, color: TColor.gray),
+                  rigtIcon: IconButton(
+                    onPressed: () {
+                      setState(() => _isPasswordVisible = !_isPasswordVisible);
+                    },
+                    icon: Icon(
+                      _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                      color: TColor.gray,
+                      size: 20,
                     ),
                   ),
                 ),
@@ -202,7 +203,6 @@ Container(
                   title: "Next >",
                   onPressed: _validateAndContinue,
                 ),
-               
                 SizedBox(height: media.width * 0.02),
                 TextButton(
                   onPressed: () {
@@ -210,24 +210,22 @@ Container(
                         MaterialPageRoute(builder: (context) => const LoginView()));
                   },
                   child: Row(
-  mainAxisAlignment: MainAxisAlignment.center, // ✅ This centers the whole row
-  children: [
-    Text(
-      "Already have an account? ",
-      style: TextStyle(color: TColor.gray, fontSize: 14),
-    ),
-    Text(
-      "Login",
-      style: TextStyle(
-        color: TColor.secondaryColor1,
-        fontSize: 14,
-        fontWeight: FontWeight.w700,
-      ),
-    ),
-  ],
-),
-
-                  
+                    mainAxisAlignment: MainAxisAlignment.center, 
+                    children: [
+                      Text(
+                        "Already have an account? ",
+                        style: TextStyle(color: TColor.gray, fontSize: 14),
+                      ),
+                      Text(
+                        "Login",
+                        style: TextStyle(
+                          color: TColor.secondaryColor1,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 SizedBox(height: media.width * 0.04),
               ],
