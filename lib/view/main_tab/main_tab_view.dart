@@ -1,8 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:fast_rhino/common/colo_extension.dart';
-import 'package:fast_rhino/common_widget/tab_button.dart';
 import 'package:fast_rhino/view/Workout/workout_library.dart';
 import 'package:fast_rhino/view/bluetooth/bluetooth_screen.dart';
-import 'package:flutter/material.dart';
 import '../Workout/sessionSummary.dart';
 import '../home/home_view.dart';
 import '../profile/profile_view.dart';
@@ -17,7 +16,23 @@ class MainTabView extends StatefulWidget {
 class _MainTabViewState extends State<MainTabView> {
   int selectTab = 0;
   final PageStorageBucket pageBucket = PageStorageBucket();
-  Widget currentTab = const HomeViewScreen();
+  late Widget currentTab;
+
+  @override
+  void initState() {
+    super.initState();
+    currentTab = const HomeViewScreen();
+  }
+
+  Widget buildTabIcon(IconData icon, bool isActive, VoidCallback onTap) {
+    return IconButton(
+      icon: Icon(
+        icon,
+        color: isActive ? TColor.secondaryColor2 : Colors.grey,
+      ),
+      onPressed: onTap,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,80 +55,40 @@ class _MainTabViewState extends State<MainTabView> {
               ),
             ],
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: TabButton(
-                  icon: "assets/img/home_tab.png",
-                  selectIcon: "assets/img/home_tab_select.png",
-                  isActive: selectTab == 0,
-                  onTap: () {
-                    setState(() {
-                      selectTab = 0;
-                      currentTab = const HomeViewScreen();
-                    });
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: TabButton(
-                  icon: "assets/img/activity_tab.png",
-                  selectIcon: "assets/img/activity_tab_select.png",
-                  isActive: selectTab == 1,
-                  onTap: () {
-                    setState(() {
-                      selectTab = 1;
-                      currentTab = WorkoutLibrary(eObj: {"name": "Workout Library"});
-                    });
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: TabButton(
-                  icon: "assets/img/camera_tab.png",
-                  selectIcon: "assets/img/camera_tab_select.png",
-                  isActive: selectTab == 2,
-                  onTap: () {
-                    setState(() {
-                      selectTab = 2;
-                      currentTab = BluetoothScreen();
-                    });
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: TabButton(
-                  icon: "assets/img/camera_tab.png",
-                  selectIcon: "assets/img/camera_tab_select.png",
-                  isActive: selectTab == 3,
-                  onTap: () {
-                    setState(() {
-                      selectTab = 3;
-                      currentTab = SessionSummaryScreen(eObj: {"name": "Training summary"});
-                    });
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: TabButton(
-                  icon: "assets/img/profile_tab.png",
-                  selectIcon: "assets/img/profile_tab_select.png",
-                  isActive: selectTab == 4,
-                  onTap: () {
-                    setState(() {
-                      selectTab = 4;
-                      currentTab = const ProfileView();
-                    });
-                  },
-                ),
-              ),
+              buildTabIcon(Icons.home, selectTab == 0, () {
+                setState(() {
+                  selectTab = 0;
+                  currentTab = const HomeViewScreen();
+                });
+              }),
+              buildTabIcon(Icons.directions_bike, selectTab == 1, () {
+                setState(() {
+                  selectTab = 1;
+                  currentTab = WorkoutLibrary(eObj: {"name": "Workout Library"});
+                });
+              }),
+              buildTabIcon(Icons.bluetooth, selectTab == 2, () {
+                setState(() {
+                  selectTab = 2;
+                  currentTab =  BluetoothScreen();
+                });
+              }),
+              buildTabIcon(Icons.bar_chart, selectTab == 3, () {
+                setState(() {
+                  selectTab = 3;
+                  currentTab = SessionSummaryScreen(eObj: {"name": "Training summary"});
+                });
+              }),
+              buildTabIcon(Icons.person, selectTab == 4, () {
+                setState(() {
+                  selectTab = 4;
+                  currentTab = const ProfileView();
+                });
+              }),
             ],
           ),
         ),

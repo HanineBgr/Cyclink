@@ -1,4 +1,6 @@
+// workout_library.dart
 import 'package:fast_rhino/providers/workout_provider.dart';
+import 'package:fast_rhino/view/Workout/detailScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fast_rhino/common_widget/workout_card.dart';
@@ -20,6 +22,8 @@ class WorkoutLibrary extends StatefulWidget {
 
 class _WorkoutLibraryState extends State<WorkoutLibrary> {
   TextEditingController txtSearch = TextEditingController();
+  double selectedTss = 100;
+  double selectedDuration = 90;
 
   @override
   void initState() {
@@ -110,13 +114,46 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
                   Expanded(
                     child: TextField(
                       controller: txtSearch,
+                      onChanged: (value) {
+                        final searchText = value.trim();
+                        if (searchText.isEmpty) {
+                          Provider.of<WorkoutProvider>(context, listen: false)
+                              .fetchWorkouts();
+                        }
+                      },
+                      onSubmitted: (value) {
+                        final searchText = value.trim();
+                        if (searchText.isNotEmpty) {
+                          Provider.of<WorkoutProvider>(context, listen: false)
+                              .searchWorkoutsByName(searchText);
+                        } else {
+                          Provider.of<WorkoutProvider>(context, listen: false)
+                              .fetchWorkouts();
+                        }
+                      },
+                      textInputAction: TextInputAction.done,
                       decoration: InputDecoration(
                         focusedBorder: InputBorder.none,
                         enabledBorder: InputBorder.none,
-                        prefixIcon: Image.asset(
-                          "assets/img/search.png",
-                          width: 25,
-                          height: 25,
+                        prefixIcon: GestureDetector(
+                          onTap: () {
+                            final searchText = txtSearch.text.trim();
+                            if (searchText.isNotEmpty) {
+                              Provider.of<WorkoutProvider>(context, listen: false)
+                                  .searchWorkoutsByName(searchText);
+                            } else {
+                              Provider.of<WorkoutProvider>(context, listen: false)
+                                  .fetchWorkouts();
+                            }
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Image.asset(
+                              "assets/img/search.png",
+                              width: 25,
+                              height: 25,
+                            ),
+                          ),
                         ),
                         hintText: "Search Workout",
                       ),
@@ -142,7 +179,6 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
 
             SizedBox(height: media.width * 0.05),
 
-            // 🏷️ Title
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Text(
@@ -155,7 +191,6 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
             ),
             SizedBox(height: media.width * 0.02),
 
-            // 📝 Description
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Text(
@@ -179,7 +214,6 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
               ),
             ),
 
-            // 📊 Power Graph Placeholder
             Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
@@ -191,49 +225,54 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
             ),
             PowerChart(),
 
-            // 🔢 Workout Metrics
             WorkoutMetricsRow(),
             SizedBox(height: media.width * 0.02),
 
-            // ▶️ Start Button
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: RoundButton(
-                height: 25,
-                title: "Start Session",
-                onPressed: () {
-                  // start session logic
-                },
-              ),
-            ),
-            SizedBox(height: media.width * 0.05),
-
-            // 🎚️ Range Sliders
             CustomRangeSlider(
               title: "TSS Range: 0–200",
               min: 0,
               max: 200,
-              initialValue: 100,
+              initialValue: selectedTss,
               labels: ["Regular", "Low", "High", "Very high"],
               activeColor: TColor.primaryColor1,
               onChanged: (value) {
-                print("TSS: $value");
+                setState(() {
+                  selectedTss = value;
+                });
+
+                Provider.of<WorkoutProvider>(context, listen: false)
+                    .filterWorkouts(
+                      minTss: 0,
+                      maxTss: selectedTss.toInt(),
+                      minDuration: 0,
+                      maxDuration: selectedDuration.toInt(),
+                    );
               },
             ),
+
             const SizedBox(height: 24),
             CustomRangeSlider(
               title: "Duration range 0–180 min",
               min: 0,
               max: 180,
-              initialValue: 90,
+              initialValue: selectedDuration,
               labels: ["Short", "Medium", "Long", "Epic"],
               activeColor: TColor.secondaryColor2,
               onChanged: (value) {
-                print("Duration: $value");
+                setState(() {
+                  selectedDuration = value;
+                });
+
+                Provider.of<WorkoutProvider>(context, listen: false)
+                    .filterWorkouts(
+                      minTss: 0,
+                      maxTss: selectedTss.toInt(),
+                      minDuration: 0,
+                      maxDuration: selectedDuration.toInt(),
+                    );
               },
             ),
 
-            // 📂 Loaded Workouts Section
             SizedBox(height: media.width * 0.02),
             Padding(
               padding:
@@ -252,7 +291,19 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
             else
               Column(
                 children: workouts
-                    .map((workout) => WorkoutCard(workout: workout))
+                    .map(
+                      (workout) => GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => WorkoutDetailScreen(workout: workout),
+                            ),
+                          );
+                        },
+                        child: WorkoutCard(workout: workout),
+                      ),
+                    )
                     .toList(),
               ),
           ],

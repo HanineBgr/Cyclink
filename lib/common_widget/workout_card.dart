@@ -27,9 +27,8 @@ class WorkoutCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 🔺 Placeholder for workout visual
-         /*WorkoutGraph(
-  data: extractWorkoutGraphData(workout.xml), // from your workout object
-),*/
+ WorkoutGraph(data: extractWorkoutGraphData(workout.xml)),
+
 
           // 🧠 Workout details
           Padding(
