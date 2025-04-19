@@ -39,7 +39,7 @@ class _LoginViewState extends State<LoginView> {
   }
 
   Future<void> _handleLogin() async {
-    if (_isLoading) return; // Prevent multiple clicks
+    if (_isLoading) return; 
 
     final email = emailController.text.trim();
     final password = passwordController.text.trim();

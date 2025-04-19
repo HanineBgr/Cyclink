@@ -10,7 +10,7 @@ class WorkoutGraphBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final totalDuration = intervals.fold(0.0, (sum, i) => sum + i.duration);
-    const maxHeight = 40.0;
+    const maxHeight = 50.0; // Increased from 40.0 to 100.0
 
     return SizedBox(
       height: maxHeight,
@@ -24,11 +24,11 @@ class WorkoutGraphBar extends StatelessWidget {
           return Expanded(
             flex: flex,
             child: Container(
-              height: height.clamp(4.0, maxHeight),
+              height: height.clamp(10.0, maxHeight), // Increased min height too
               margin: const EdgeInsets.symmetric(horizontal: 0.5),
               decoration: BoxDecoration(
                 color: color,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(2)),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
               ),
             ),
           );

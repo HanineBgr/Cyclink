@@ -1,138 +1,190 @@
-/*import 'dart:async';
-import 'package:fast_rhino/common_widget/workout_chart.dart';
-import 'package:fast_rhino/models/Workout/workout.dart';
-import 'package:fast_rhino/helpers/graph_parser.dart';
-import 'package:fast_rhino/providers/auth_provider.dart';
-import 'package:fast_rhino/services/bluetooth/bluetooth_service.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:fast_rhino/models/Workout/workout.dart';
+import 'package:fast_rhino/services/bluetooth/bluetooth_service.dart';
+import 'package:fast_rhino/common/colo_extension.dart';
 
 class LiveSessionScreen extends StatefulWidget {
   final Workout workout;
   final FtmsController ftmsController;
 
-  const LiveSessionScreen({super.key, required this.workout, required this.ftmsController});
+  const LiveSessionScreen({
+    super.key,
+    required this.workout,
+    required this.ftmsController,
+  });
 
   @override
   State<LiveSessionScreen> createState() => _LiveSessionScreenState();
 }
 
 class _LiveSessionScreenState extends State<LiveSessionScreen> {
-  int currentStepIndex = 0;
-  late List<_WorkoutStep> workoutSteps;
-  Timer? stepTimer;
+  int targetPower = 100;
+  int currentPower = 0;
+  int heartRate = 0;
+  int cadence = 0;
+  double speed = 0.0;
+  int intervalIndex = 1;
+  Duration elapsed = Duration.zero;
+  Duration totalDuration = Duration(minutes: 45);
+
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-    _buildWorkoutSteps();
-    _startNextStep();
-  }
+    widget.ftmsController.onPowerReceived = (val) {
+      setState(() => currentPower = val);
+    };
+    widget.ftmsController.onCadenceReceived = (val) {
+      setState(() => cadence = val);
+    };
+    widget.ftmsController.onHeartRateReceived = (val) {
+      setState(() => heartRate = val);
+    };
 
-  void _buildWorkoutSteps() {
-    // This should be replaced by actual XML parsing to build steps dynamically
-    workoutSteps = [
-      _WorkoutStep(label: 'Warmup', durationSec: 600, ftpPercentage: 0.6),
-      _WorkoutStep(label: 'Interval 1', durationSec: 180, ftpPercentage: 1.2),
-      _WorkoutStep(label: 'Recovery', durationSec: 60, ftpPercentage: 0.65),
-      _WorkoutStep(label: 'Interval 2', durationSec: 180, ftpPercentage: 1.2),
-      _WorkoutStep(label: 'Recovery', durationSec: 60, ftpPercentage: 0.65),
-      _WorkoutStep(label: 'Cooldown', durationSec: 300, ftpPercentage: 0.5),
-    ];
-  }
-
-  void _startNextStep() {
-    if (currentStepIndex >= workoutSteps.length) return;
-
-    final userFtp = Provider.of<AuthProvider>(context, listen: false).ftp;
-    final step = workoutSteps[currentStepIndex];
-    final targetWatts = (userFtp * step.ftpPercentage).round();
-
-    widget.ftmsController.sendTargetPower(targetWatts);
-
-    stepTimer = Timer(Duration(seconds: step.durationSec), () {
-      setState(() => currentStepIndex++);
-      _startNextStep();
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        elapsed += const Duration(seconds: 1);
+      });
     });
   }
 
   @override
   void dispose() {
-    stepTimer?.cancel();
+    _timer?.cancel();
+    widget.ftmsController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final step = currentStepIndex < workoutSteps.length ? workoutSteps[currentStepIndex] : null;
-
+    final remaining = totalDuration - elapsed;
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: const Color(0xFF111B2E),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildMetricTile("POWER LAP", "187"),
-                  _buildMetricTile("POWER", "${step != null ? (Provider.of<AuthProvider>(context).ftp * step.ftpPercentage).round() : '--'}"),
-                  _buildMetricTile("INTERVAL TIME", "${step != null ? step.durationSec ~/ 60 : '--'}:00"),
-                  _buildMetricTile("HEART RATE", "89", color: Colors.red),
+                  Row(
+                    children: [
+                      const Icon(Icons.arrow_back, color: Colors.white),
+                      const Spacer(),
+                      Text(widget.workout.name,
+                          style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                      const Spacer(),
+                      const Icon(Icons.close, color: Colors.white),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(widget.workout.description,
+                      style: const TextStyle(color: Colors.white70, fontSize: 13)),
                 ],
               ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+            ),
+
+            GridView.count(
+              crossAxisCount: 3,
+              shrinkWrap: true,
+              childAspectRatio: 1.7,
+              physics: const NeverScrollableScrollPhysics(),
+              children: [
+                _buildTile("TARGET", "$targetPower W", "40%"),
+                _buildTile("POWER", "$currentPower W", ""),
+                _buildTile("HEART RATE", "$heartRate", "ZONE Z1"),
+                _buildTile("TARGET", "85 rpm", "rpm"),
+                _buildTile("CADENCE", "$cadence rpm", ""),
+                _buildTile("SPEED", "${speed.toStringAsFixed(1)}", "AVG 7.7 km/h"),
+              ],
+            ),
+
+            const SizedBox(height: 8),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _infoText("INTERVAL", "$intervalIndex/11"),
+                _infoText("REMAINING", _formatDuration(remaining)),
+                _infoText("ELAPSED", _formatDuration(elapsed)),
+                _infoText("TOTAL", _formatDuration(totalDuration)),
+              ],
+            ),
+
+            const SizedBox(height: 10),
+            LinearProgressIndicator(
+              value: elapsed.inSeconds / totalDuration.inSeconds,
+              minHeight: 6,
+              color: Colors.lightBlueAccent,
+              backgroundColor: Colors.grey[800],
+            ),
+
+            const SizedBox(height: 20),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              //child: LiveWorkoutGraph(), // create this widget to mimic the bar chart
+            ),
+
+            const Spacer(),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildMetricTile("TARGET", step != null ? "${(step.ftpPercentage * 100).toInt()}%" : '--'),
-                  _buildMetricTile("ELAPSED TIME", "00:01:00"),
-                  _buildMetricTile("CADENCE", "102"),
-                  _buildMetricTile("SPEED", "29.5"),
-                  _buildMetricTile("DISTANCE", "381"),
+                  _bottomButton("ERG", Colors.indigo),
+                  _bottomButton("INTENSITY\n100%", Colors.green),
                 ],
               ),
-              const SizedBox(height: 30),
-              Text(
-                step != null ? step.label : "Session Complete!",
-                style: const TextStyle(fontSize: 24, color: Colors.white),
-              ),
-              const SizedBox(height: 20),
-              Expanded(child: WorkoutGraph(data: extractWorkoutGraphData(widget.workout.xml)))
-            ],
-          ),
+            ),
+            const SizedBox(height: 16),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildMetricTile(String label, String value, {Color color = Colors.white}) {
+  Widget _buildTile(String title, String value, String sub) {
+    return Container(
+      margin: const EdgeInsets.all(6),
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.blueGrey[900],
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: const TextStyle(color: Colors.white70, fontSize: 10)),
+          const SizedBox(height: 4),
+          Text(value, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+          Text(sub, style: const TextStyle(color: Colors.lightBlue, fontSize: 10)),
+        ],
+      ),
+    );
+  }
+
+  Widget _infoText(String title, String value) {
     return Column(
       children: [
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: color,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12, color: Colors.white60),
-        ),
+        Text(title, style: const TextStyle(color: Colors.white70, fontSize: 10)),
+        Text(value, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
       ],
     );
   }
-}
 
-class _WorkoutStep {
-  final String label;
-  final int durationSec;
-  final double ftpPercentage;
+  Widget _bottomButton(String label, Color bg) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 24),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Text(label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+    );
+  }
 
-  _WorkoutStep({required this.label, required this.durationSec, required this.ftpPercentage});
+  String _formatDuration(Duration d) => d.toString().split('.').first.padLeft(5, "0");
 }
-*/

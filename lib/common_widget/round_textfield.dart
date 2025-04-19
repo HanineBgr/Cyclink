@@ -1,6 +1,5 @@
 
 import 'package:flutter/material.dart';
-
 import '../common/colo_extension.dart';
 
 class RoundTextField extends StatelessWidget {
@@ -18,9 +17,14 @@ class RoundTextField extends StatelessWidget {
     return Container(
       margin: margin,
       decoration: BoxDecoration(
-          color: TColor.lightGray, borderRadius: BorderRadius.circular(15)),
+          color: TColor.lightGray,
+          borderRadius: BorderRadius.circular(15)),
       child: TextField(
         controller: controller,
+       style: TextStyle( 
+        color: TColor.black,
+        fontSize: 14,
+        ),
         keyboardType: keyboardType,
         obscureText: obscureText,
         decoration: InputDecoration(

@@ -1,17 +1,20 @@
+import 'package:fast_rhino/view/planning/planning_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fast_rhino/common/colo_extension.dart';
 import 'package:fast_rhino/view/Workout/workout_library.dart';
-import 'package:fast_rhino/view/bluetooth/bluetooth_screen.dart';
-import '../Workout/sessionSummary.dart';
-import '../home/home_view.dart';
-import '../profile/profile_view.dart';
+import 'package:fast_rhino/view/home/home_view.dart';
+import 'package:fast_rhino/view/profile/profile_view.dart';
 
 class MainTabView extends StatefulWidget {
   const MainTabView({super.key});
 
   @override
   State<MainTabView> createState() => _MainTabViewState();
+
+  // 👇 This allows child widgets to access MainTabView's state
+  static _MainTabViewState? of(BuildContext context) =>
+      context.findAncestorStateOfType<_MainTabViewState>();
 }
 
 class _MainTabViewState extends State<MainTabView> {
@@ -72,11 +75,9 @@ class _MainTabViewState extends State<MainTabView> {
                 },
               ),
               buildTabIcon(
-                SvgPicture.asset(
-                  'assets/svg/home_trainer.svg',
+                Icon(
+                  Icons.list_rounded,
                   color: selectTab == 1 ? TColor.secondaryColor2 : Colors.grey,
-                  width: 28,
-                  height: 28,
                 ),
                 selectTab == 1,
                 () {
@@ -87,28 +88,30 @@ class _MainTabViewState extends State<MainTabView> {
                 },
               ),
               buildTabIcon(
-                Icon(
-                  Icons.bluetooth,
+                SvgPicture.asset(
+                  'assets/svg/home_trainer.svg',
                   color: selectTab == 2 ? TColor.secondaryColor2 : Colors.grey,
+                  width: 28,
+                  height: 28,
                 ),
                 selectTab == 2,
                 () {
                   setState(() {
                     selectTab = 2;
-                    currentTab = BluetoothScreen();
+                    // Add any widget you want to show in tab 2
                   });
                 },
               ),
               buildTabIcon(
                 Icon(
-                  Icons.bar_chart,
+                  Icons.calendar_month,
                   color: selectTab == 3 ? TColor.secondaryColor2 : Colors.grey,
                 ),
                 selectTab == 3,
                 () {
                   setState(() {
                     selectTab = 3;
-                    currentTab = SessionSummaryScreen(eObj: {"name": "Training summary"});
+                    currentTab = PlanningScreen();
                   });
                 },
               ),

@@ -202,7 +202,6 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
           selectedWorkout!.description,
           colorClickableText: TColor.primaryColor1,
           style: TextStyle(
-            
             color: TColor.gray, fontSize: 14),
         ),
         const SizedBox(height: 25),

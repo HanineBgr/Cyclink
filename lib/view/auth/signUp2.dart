@@ -29,6 +29,7 @@ class _SignUp2ScreenState extends State<SignUp2Screen> {
   final TextEditingController weightController = TextEditingController();
   final TextEditingController heightController = TextEditingController();
   final TextEditingController ftpController = TextEditingController();
+  final TextEditingController maxHrController = TextEditingController(); // ✅ Max HR
 
   bool isLoading = false;
   String? errorMessage;
@@ -108,7 +109,7 @@ class _SignUp2ScreenState extends State<SignUp2Screen> {
                     style: TextStyle(color: TColor.gray, fontSize: 12)),
                 SizedBox(height: media.width * 0.05),
 
-                /// DATE OF BIRTH (Calendar Picker)
+                /// DATE OF BIRTH
                 GestureDetector(
                   onTap: () => _selectDate(context),
                   child: AbsorbPointer(
@@ -182,6 +183,15 @@ class _SignUp2ScreenState extends State<SignUp2Screen> {
                 ),
                 SizedBox(height: media.width * 0.04),
 
+                ///  MAX HR
+                RoundTextField(
+                  hitText: "Optional: Max Heart Rate",
+                  icon: "assets/img/heart.png",
+                  controller: maxHrController,
+                  keyboardType: TextInputType.number,
+                ),
+                SizedBox(height: media.width * 0.04),
+
                 /// Error
                 if (errorMessage != null)
                   Padding(
@@ -202,13 +212,11 @@ class _SignUp2ScreenState extends State<SignUp2Screen> {
                           });
 
                           try {
-                            final DateTime dob =
-                                DateTime.parse(dateOfBirthController.text.trim());
-                            final double weight =
-                                double.parse(weightController.text.trim());
-                            final double height =
-                                double.parse(heightController.text.trim());
+                            final DateTime dob = DateTime.parse(dateOfBirthController.text.trim());
+                            final double weight = double.parse(weightController.text.trim());
+                            final double height = double.parse(heightController.text.trim());
                             final int ftp = int.parse(ftpController.text.trim());
+                            final int maxHr = int.parse(maxHrController.text.trim());
 
                             await authProvider.signUp(
                               email: widget.email,
@@ -219,6 +227,7 @@ class _SignUp2ScreenState extends State<SignUp2Screen> {
                               weight: weight,
                               height: height,
                               ftp: ftp,
+                              maxHR: maxHr, // ✅ new param
                               preferences: {},
                             );
 

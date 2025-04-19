@@ -1,8 +1,9 @@
 import 'package:fast_rhino/services/bluetooth/bluetooth_service.dart';
+import 'package:fast_rhino/view/bluetooth/bluetooth_settings.dart';
 import 'package:flutter/material.dart';
 import '../common/colo_extension.dart';
 import '../models/Workout/workout.dart';
-// import '../view/Workout/trainingSession.dart';
+import '../view/Workout/trainingSession.dart'; // ton écran de session en direct
 
 class SessionSliderCard extends StatelessWidget {
   final Workout workout;
@@ -18,10 +19,25 @@ class SessionSliderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: ElevatedButton.icon(
-        onPressed: () {
-          // You can add your navigation logic here
-          // Navigator.push(...);
-          print('Start workout: ${workout.name}');
+        onPressed: () async {
+          // Afficher le popup Bluetooth
+          showDialog(
+            context: context,
+            builder: (_) => BluetoothPopupDialog(
+              onConnected: (trainerId) {
+                // Une fois connecté, aller à l’écran de session
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => LiveSessionScreen(
+                      workout: workout,
+                      ftmsController: ftmsController,
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
         },
         icon: const Icon(Icons.play_arrow),
         label: const Text("Start Workout"),

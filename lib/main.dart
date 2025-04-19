@@ -1,4 +1,5 @@
 import 'package:fast_rhino/providers/workout_provider.dart';
+import 'package:fast_rhino/view/Splash/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -25,7 +26,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final storage = const FlutterSecureStorage();
-  Widget _initialScreen = const OnBoardingView();
+  Widget _initialScreen = const SplashScreen();
 
   @override
   void initState() {

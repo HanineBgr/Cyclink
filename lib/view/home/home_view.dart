@@ -1,5 +1,7 @@
 import 'package:fast_rhino/common_widget/tss_chart.dart';
 import 'package:fast_rhino/providers/auth_provider.dart';
+import 'package:fast_rhino/view/main_tab/main_tab_view.dart';
+import 'package:fast_rhino/view/profile/profile_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../common_widget/performance_chart.dart';
@@ -27,7 +29,7 @@ class HomeViewScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SizedBox(height: screenHeight * 0.05),
-            _buildHeader(userName),
+            _buildHeader(context, userName),
             SizedBox(height: screenHeight * 0.02),
             _buildCenteredWidget(TrainingStatus(), maxWidth),
             SizedBox(height: screenHeight * 0.02),
@@ -52,7 +54,7 @@ class HomeViewScreen extends StatelessWidget {
                 activityIcon: Icons.directions_bike_sharp,
               ),
               maxWidth,
-            ), 
+            ),
             SizedBox(height: screenHeight * 0.015),
             _buildCenteredWidget(
               RecentActivities(
@@ -80,10 +82,20 @@ class HomeViewScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(String userName) {
+  Widget _buildHeader(BuildContext context, String userName) {
     return ListTile(
-      leading: const CircleAvatar(
-        backgroundImage: AssetImage('assets/img/u1.png'),
+      leading: GestureDetector(
+        onTap: () {
+          MainTabView.of(context)?.setState(() {
+            MainTabView.of(context)!.selectTab = 4;
+            MainTabView.of(context)!.currentTab = const ProfileView();
+          });
+        },
+       child: const CircleAvatar(
+  backgroundImage: AssetImage('assets/img/user.png'),
+  backgroundColor: Color.fromARGB(0, 255, 244, 244),
+),
+
       ),
       title: Text(
         'Welcome $userName!',
