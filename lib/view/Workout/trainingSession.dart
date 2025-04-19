@@ -1,217 +1,138 @@
-import 'dart:async';
+/*import 'dart:async';
+import 'package:fast_rhino/common_widget/workout_chart.dart';
+import 'package:fast_rhino/models/Workout/workout.dart';
+import 'package:fast_rhino/helpers/graph_parser.dart';
+import 'package:fast_rhino/providers/auth_provider.dart';
+import 'package:fast_rhino/services/bluetooth/bluetooth_service.dart';
 import 'package:flutter/material.dart';
-import 'package:fast_rhino/common/colo_extension.dart';
-import '../../common_widget/adjust_power_card.dart';
-import '../../common_widget/play_session card.dart';
+import 'package:provider/provider.dart';
 
-class TrainingSessionScreen extends StatefulWidget {
-  final Map eObj;
-  const TrainingSessionScreen({super.key, required this.eObj});
+class LiveSessionScreen extends StatefulWidget {
+  final Workout workout;
+  final FtmsController ftmsController;
+
+  const LiveSessionScreen({super.key, required this.workout, required this.ftmsController});
 
   @override
-  State<TrainingSessionScreen> createState() => _TrainingSessionScreenState();
+  State<LiveSessionScreen> createState() => _LiveSessionScreenState();
 }
 
-class _TrainingSessionScreenState extends State<TrainingSessionScreen> {
-  int instructionIndex = 0;
-  bool showInstruction = false;
-  Timer? _instructionTimer;
-  Timer? _hideInstructionTimer;
-
-  final List<String> instructions = [
-    "Let’s make today count!",
-    "Push your limits!",
-    "Stay focused and breathe.",
-    "You’re doing great! Keep going!",
-  ];
+class _LiveSessionScreenState extends State<LiveSessionScreen> {
+  int currentStepIndex = 0;
+  late List<_WorkoutStep> workoutSteps;
+  Timer? stepTimer;
 
   @override
   void initState() {
     super.initState();
-    startInstructionAlertCycle();
+    _buildWorkoutSteps();
+    _startNextStep();
   }
 
-  void startInstructionAlertCycle() {
-    _instructionTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
-      for (int i = 0; i < 3; i++) {
-        Future.delayed(Duration(seconds: i), () {
-          print('Bip ${i + 1}'); // Replace with your audio logic
-        });
-      }
+  void _buildWorkoutSteps() {
+    // This should be replaced by actual XML parsing to build steps dynamically
+    workoutSteps = [
+      _WorkoutStep(label: 'Warmup', durationSec: 600, ftpPercentage: 0.6),
+      _WorkoutStep(label: 'Interval 1', durationSec: 180, ftpPercentage: 1.2),
+      _WorkoutStep(label: 'Recovery', durationSec: 60, ftpPercentage: 0.65),
+      _WorkoutStep(label: 'Interval 2', durationSec: 180, ftpPercentage: 1.2),
+      _WorkoutStep(label: 'Recovery', durationSec: 60, ftpPercentage: 0.65),
+      _WorkoutStep(label: 'Cooldown', durationSec: 300, ftpPercentage: 0.5),
+    ];
+  }
 
-      setState(() {
-        instructionIndex = (instructionIndex + 1) % instructions.length;
-        showInstruction = true;
-      });
+  void _startNextStep() {
+    if (currentStepIndex >= workoutSteps.length) return;
 
-      _hideInstructionTimer?.cancel();
-      _hideInstructionTimer = Timer(const Duration(seconds: 5), () {
-        setState(() {
-          showInstruction = false;
-        });
-      });
+    final userFtp = Provider.of<AuthProvider>(context, listen: false).ftp;
+    final step = workoutSteps[currentStepIndex];
+    final targetWatts = (userFtp * step.ftpPercentage).round();
+
+    widget.ftmsController.sendTargetPower(targetWatts);
+
+    stepTimer = Timer(Duration(seconds: step.durationSec), () {
+      setState(() => currentStepIndex++);
+      _startNextStep();
     });
   }
 
   @override
   void dispose() {
-    _instructionTimer?.cancel();
-    _hideInstructionTimer?.cancel();
+    stepTimer?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final step = currentStepIndex < workoutSteps.length ? workoutSteps[currentStepIndex] : null;
 
     return Scaffold(
-      backgroundColor: Colors.white, // Dark mode background
-      appBar: AppBar(
-        backgroundColor:  Colors.white,
-        centerTitle: true,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: theme.iconTheme.color),
-          onPressed: () => Navigator.pop(context),
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildMetricTile("POWER LAP", "187"),
+                  _buildMetricTile("POWER", "${step != null ? (Provider.of<AuthProvider>(context).ftp * step.ftpPercentage).round() : '--'}"),
+                  _buildMetricTile("INTERVAL TIME", "${step != null ? step.durationSec ~/ 60 : '--'}:00"),
+                  _buildMetricTile("HEART RATE", "89", color: Colors.red),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildMetricTile("TARGET", step != null ? "${(step.ftpPercentage * 100).toInt()}%" : '--'),
+                  _buildMetricTile("ELAPSED TIME", "00:01:00"),
+                  _buildMetricTile("CADENCE", "102"),
+                  _buildMetricTile("SPEED", "29.5"),
+                  _buildMetricTile("DISTANCE", "381"),
+                ],
+              ),
+              const SizedBox(height: 30),
+              Text(
+                step != null ? step.label : "Session Complete!",
+                style: const TextStyle(fontSize: 24, color: Colors.white),
+              ),
+              const SizedBox(height: 20),
+              Expanded(child: WorkoutGraph(data: extractWorkoutGraphData(widget.workout.xml)))
+            ],
+          ),
         ),
-        title: Text(
-          widget.eObj["name"].toString(),
+      ),
+    );
+  }
+
+  Widget _buildMetricTile(String label, String value, {Color color = Colors.white}) {
+    return Column(
+      children: [
+        Text(
+          value,
           style: TextStyle(
-            color: isDark ? Colors.white : theme.textTheme.titleLarge?.color,  // Dynamically adapting text color
+            fontSize: 20,
             fontWeight: FontWeight.bold,
+            color: color,
           ),
         ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0), // Consistent padding for the entire body
-        child: Center(
-          child: SizedBox(
-            height: screenHeight * 0.85,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildStatsCard(isDark),
-                if (showInstruction) _buildInstructionAlert(theme, isDark),
-                _buildIntervalBar(),
-                _buildProgressBar(),
-                PlaySessionCard(),
-                ModeAndPowerAdjuster(),
-              ],
-            ),
-          ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 12, color: Colors.white60),
         ),
-      ),
-    );
-  }
-
-  Widget _buildStatsCard(bool isDark) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? Colors.grey[800] : TColor.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [if (!isDark) const BoxShadow(color: Colors.black12, blurRadius: 4)],
-      ),
-      child: Table(
-        columnWidths: const {
-          0: FlexColumnWidth(3),
-          1: FlexColumnWidth(3),
-          2: FlexColumnWidth(3),
-        },
-        border: TableBorder.all(color: TColor.lightGray, width: 1),
-        children: [
-          _buildTableRow("Target power", "200", "Power 3Sec", "98", "BPM", "169"),
-          _buildTableRow("Target RPM", "98", "RPM", "105", "Speed (km/h)", "25"),
-          _buildTableRow("Interval", "12/43", "Remaining", "45:30", "Session", "45:30"),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInstructionAlert(ThemeData theme, bool isDark) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 16), // Added vertical margin
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? Colors.grey[850] : Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 6)],
-      ),
-      child: Column(
-        children: [
-          const SizedBox(height: 8),
-          Text(instructions[instructionIndex], style: theme.textTheme.bodyMedium),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildIntervalBar() {
-    return Container(
-      height: 80,
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: TColor.lightGray,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: CustomPaint(painter: IntervalBarPainter(), child: Container()),
-    );
-  }
-
-  Widget _buildProgressBar() {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: LinearProgressIndicator(
-        value: 0.4,
-        minHeight: 8,
-        backgroundColor: Colors.grey[300],
-        color: TColor.primaryColor1,
-      ),
-    );
-  }
-
-  TableRow _buildTableRow(String title1, String value1, String title2, String value2, String title3, String value3) {
-    return TableRow(children: [
-      _buildTableCell(title1, value1),
-      _buildTableCell(title2, value2),
-      _buildTableCell(title3, value3),
-    ]);
-  }
-
-  Widget _buildTableCell(String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16),
-      child: Column(
-        children: [
-          Text(title, style: const TextStyle(fontSize: 10, color: Colors.grey)),
-          const SizedBox(height: 4),
-          Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: TColor.primaryColor1)),
-        ],
-      ),
+      ],
     );
   }
 }
 
-class IntervalBarPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = TColor.primaryColor1.withOpacity(0.5)
-      ..style = PaintingStyle.fill;
+class _WorkoutStep {
+  final String label;
+  final int durationSec;
+  final double ftpPercentage;
 
-    final barWidth = size.width / 6;
-    final barHeights = [30.0, 80.0, 80.0, 30.0, 80.0, 30.0];
-
-    for (int i = 0; i < 6; i++) {
-      canvas.drawRect(
-        Rect.fromLTWH(i * barWidth, size.height - barHeights[i], barWidth, barHeights[i]),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
+  _WorkoutStep({required this.label, required this.durationSec, required this.ftpPercentage});
 }
+*/

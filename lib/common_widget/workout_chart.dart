@@ -1,64 +1,39 @@
-import 'package:fl_chart/fl_chart.dart';
+import 'package:fast_rhino/models/Workout/interval.dart';
 import 'package:flutter/material.dart';
+import '../helpers/zone_helper.dart';
 
-class WorkoutGraph extends StatelessWidget {
-  final List<Map<String, dynamic>> data;
+class WorkoutGraphBar extends StatelessWidget {
+  final List<WorkoutInterval> intervals;
 
-  const WorkoutGraph({super.key, required this.data});
+  const WorkoutGraphBar({super.key, required this.intervals});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 60,
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: BarChart(
-        BarChartData(
-          alignment: BarChartAlignment.start,
-          maxY: 6, 
-          titlesData: FlTitlesData(show: false),
-          borderData: FlBorderData(show: false),
-          gridData: FlGridData(show: false),
-          barGroups: _generateContinuousBarGroups(data),
-          barTouchData: BarTouchData(enabled: false),
-        ),
+    final totalDuration = intervals.fold(0.0, (sum, i) => sum + i.duration);
+    const maxHeight = 40.0;
+
+    return SizedBox(
+      height: maxHeight,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: intervals.map((interval) {
+          final height = maxHeight * (interval.power / 250); // 250% FTP
+          final color = getZoneColor(interval.power);
+          final flex = (interval.duration * 100).toInt();
+
+          return Expanded(
+            flex: flex,
+            child: Container(
+              height: height.clamp(4.0, maxHeight),
+              margin: const EdgeInsets.symmetric(horizontal: 0.5),
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(2)),
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
-  }
-
-  List<BarChartGroupData> _generateContinuousBarGroups(List<Map<String, dynamic>> data) {
-    return List.generate(data.length, (index) {
-      final item = data[index];
-      final power = (item['power'] ?? 0.0) as double;
-      final type = (item['type'] ?? 'SteadyState') as String;
-
-      return BarChartGroupData(
-        x: index,
-        barsSpace: 0,
-        barRods: [
-          BarChartRodData(
-            toY: power * 3, 
-            width: 10,
-            borderRadius: BorderRadius.zero,
-            color: getColorForType(type),
-          )
-        ],
-      );
-    });
-  }
-
-  Color getColorForType(String type) {
-    switch (type) {
-      case 'Warmup':
-        return Colors.orange;
-      case 'Cooldown':
-        return Colors.blue.shade400;
-      case 'IntervalsT':
-        return Colors.red;
-      case 'SteadyState':
-        return Colors.green.shade300;
-      default:
-        return Colors.grey;
-    }
   }
 }

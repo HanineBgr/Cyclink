@@ -1,55 +1,58 @@
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'dart:async';
+import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 
-class BLEService {
-  final FlutterBluePlus flutterBlue = FlutterBluePlus();
-  BluetoothDevice? connectedDevice;
-  BluetoothCharacteristic? ftmsCharacteristic;
+class FtmsController {
+  final FlutterReactiveBle _ble = FlutterReactiveBle();
+  late DiscoveredDevice connectedDevice;
+  late QualifiedCharacteristic powerMeasurementChar;
 
-  // UUID du service FTMS (Fitness Machine Service)
-  static const String ftmsServiceUUID = "00001826-0000-1000-8000-00805f9b34fb";
+  StreamSubscription<List<int>>? _powerSubscription;
+  StreamSubscription<ConnectionStateUpdate>? _connectionSubscription;
 
-  // UUID de la caractéristique "Fitness Machine Measurement"
-  static const String ftmsCharacteristicUUID = "00002acc-0000-1000-8000-00805f9b34fb";
+  Function(int power)? onPowerReceived;
+  Function(int cadence)? onCadenceReceived;
+  Function(int hr)? onHeartRateReceived;
 
-  // Scanner les périphériques BLE
-  Stream<List<ScanResult>> scanDevices() {
-    FlutterBluePlus.startScan(timeout: Duration(seconds: 15));
-    return FlutterBluePlus.scanResults;
-  }
+  Future<void> connectToTrainer(String deviceId) async {
+    _connectionSubscription = _ble.connectToDevice(id: deviceId).listen(
+      (connectionState) {
+        if (connectionState.connectionState == DeviceConnectionState.connected) {
+          print('✅ Connected to FTMS trainer: $deviceId');
 
-  // Se connecter à un périphérique BLE
-  Future<void> connectToDevice(BluetoothDevice device) async {
-    await device.connect();
-    connectedDevice = device;
-    print('Connecté à ${device.name}');
-    await discoverServices();
-  }
+          final characteristic = QualifiedCharacteristic(
+            serviceId: Uuid.parse("1826"), // Fitness Machine Service
+            characteristicId: Uuid.parse("2AD2"), // Indoor Bike Data
+            deviceId: deviceId,
+          );
 
-  // Découvrir les services du périphérique connecté
-  Future<void> discoverServices() async {
-    if (connectedDevice == null) return;
+          powerMeasurementChar = characteristic;
 
-    List<BluetoothService> services = await connectedDevice!.discoverServices();
-    for (BluetoothService service in services) {
-      if (service.uuid.toString() == ftmsServiceUUID) {
-        for (BluetoothCharacteristic characteristic in service.characteristics) {
-          if (characteristic.uuid.toString() == ftmsCharacteristicUUID) {
-            ftmsCharacteristic = characteristic;
-            listenToFTMSData();
-            break;
-          }
+          _powerSubscription = _ble
+              .subscribeToCharacteristic(characteristic)
+              .listen((data) => _parseIndoorBikeData(data));
+        } else if (connectionState.connectionState == DeviceConnectionState.disconnected) {
+          print('⚠️ Disconnected from trainer.');
         }
-      }
-    }
+      },
+      onError: (e) => print('❌ Connection error: $e'),
+    );
   }
 
-  // Lire et écouter les données FTMS
-  void listenToFTMSData() {
-    if (ftmsCharacteristic != null) {
-      ftmsCharacteristic!.setNotifyValue(true);
-      ftmsCharacteristic!.value.listen((value) {
-        print('Données FTMS reçues : $value');
-      });
-    }
+  void _parseIndoorBikeData(List<int> data) {
+    if (data.length < 8) return;
+
+    final flags = data[0];
+    final power = data[2] | (data[3] << 8);
+    final cadence = data[4] | (data[5] << 8);
+    final hr = data[6];
+
+    onPowerReceived?.call(power);
+    onCadenceReceived?.call(cadence);
+    onHeartRateReceived?.call(hr);
+  }
+
+  void dispose() {
+    _powerSubscription?.cancel();
+    _connectionSubscription?.cancel();
   }
 }

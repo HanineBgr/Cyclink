@@ -14,52 +14,50 @@ class AuthProvider with ChangeNotifier {
   User? get user => _user;
   String? get token => _token;
   bool get isAuthenticated => _token != null;
+  int get ftp => _user?.ftp ?? 0;
 
   /// Sign In
- Future<void> signIn({
-  required String email,
-  required String password,
-}) async {
-  final response = await AuthService.signIn(email: email, password: password);
-  _token = response['token'];
+  Future<void> signIn({
+    required String email,
+    required String password,
+  }) async {
+    final response = await AuthService.signIn(email: email, password: password);
+    _token = response['token'];
 
-  if (_token == null) {
-    throw Exception('Sign-in failed: token missing');
+    if (_token == null) {
+      throw Exception('Sign-in failed: token missing');
+    }
+
+    // Save token for future use
+    await _storage.write(key: 'token', value: _token);
+
+    _user = User.fromJson(response['user']);
+    notifyListeners();
   }
-
-  // Save token for future use
-  await _storage.write(key: 'token', value: _token);
-
-  _user = User.fromJson(response['user']);
-  notifyListeners();
-}
-
 
   /// Fetch current user based on saved token
   Future<void> fetchUser() async {
-  _isLoading = true;
-  notifyListeners();
+    _isLoading = true;
+    notifyListeners();
 
-  _token ??= await _storage.read(key: 'token'); 
+    _token ??= await _storage.read(key: 'token');
 
-  if (_token == null) {
+    if (_token == null) {
+      _isLoading = false;
+      notifyListeners();
+      throw Exception('Token is null');
+    }
+
+    try {
+      final userData = await AuthService.fetchUser(token: _token!);
+      _user = userData;
+    } catch (e) {
+      print('Fetch user error: $e');
+    }
+
     _isLoading = false;
     notifyListeners();
-    throw Exception('Token is null');
   }
-
-  try {
-    final userData = await AuthService.fetchUser(token: _token!);
-    _user = userData;
-  } catch (e) {
-    print('Fetch user error: $e');
-  }
-
-  _isLoading = false;
-  notifyListeners();
-}
-
-
 
   /// Sign Up (token is not returned here, so we don't store it)
   Future<void> signUp({

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fast_rhino/common/colo_extension.dart';
 import 'package:fast_rhino/view/Workout/workout_library.dart';
 import 'package:fast_rhino/view/bluetooth/bluetooth_screen.dart';
@@ -24,13 +25,11 @@ class _MainTabViewState extends State<MainTabView> {
     currentTab = const HomeViewScreen();
   }
 
-  Widget buildTabIcon(IconData icon, bool isActive, VoidCallback onTap) {
+  Widget buildTabIcon(Widget iconWidget, bool isActive, VoidCallback onTap) {
     return IconButton(
-      icon: Icon(
-        icon,
-        color: isActive ? TColor.secondaryColor2 : Colors.grey,
-      ),
+      icon: iconWidget,
       onPressed: onTap,
+      splashRadius: 24,
     );
   }
 
@@ -59,36 +58,73 @@ class _MainTabViewState extends State<MainTabView> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              buildTabIcon(Icons.home, selectTab == 0, () {
-                setState(() {
-                  selectTab = 0;
-                  currentTab = const HomeViewScreen();
-                });
-              }),
-              buildTabIcon(Icons.directions_bike, selectTab == 1, () {
-                setState(() {
-                  selectTab = 1;
-                  currentTab = WorkoutLibrary(eObj: {"name": "Workout Library"});
-                });
-              }),
-              buildTabIcon(Icons.bluetooth, selectTab == 2, () {
-                setState(() {
-                  selectTab = 2;
-                  currentTab =  BluetoothScreen();
-                });
-              }),
-              buildTabIcon(Icons.bar_chart, selectTab == 3, () {
-                setState(() {
-                  selectTab = 3;
-                  currentTab = SessionSummaryScreen(eObj: {"name": "Training summary"});
-                });
-              }),
-              buildTabIcon(Icons.person, selectTab == 4, () {
-                setState(() {
-                  selectTab = 4;
-                  currentTab = const ProfileView();
-                });
-              }),
+              buildTabIcon(
+                Icon(
+                  Icons.home,
+                  color: selectTab == 0 ? TColor.secondaryColor2 : Colors.grey,
+                ),
+                selectTab == 0,
+                () {
+                  setState(() {
+                    selectTab = 0;
+                    currentTab = const HomeViewScreen();
+                  });
+                },
+              ),
+              buildTabIcon(
+                SvgPicture.asset(
+                  'assets/svg/home_trainer.svg',
+                  color: selectTab == 1 ? TColor.secondaryColor2 : Colors.grey,
+                  width: 28,
+                  height: 28,
+                ),
+                selectTab == 1,
+                () {
+                  setState(() {
+                    selectTab = 1;
+                    currentTab = WorkoutLibrary(eObj: {"name": "Workout Library"});
+                  });
+                },
+              ),
+              buildTabIcon(
+                Icon(
+                  Icons.bluetooth,
+                  color: selectTab == 2 ? TColor.secondaryColor2 : Colors.grey,
+                ),
+                selectTab == 2,
+                () {
+                  setState(() {
+                    selectTab = 2;
+                    currentTab = BluetoothScreen();
+                  });
+                },
+              ),
+              buildTabIcon(
+                Icon(
+                  Icons.bar_chart,
+                  color: selectTab == 3 ? TColor.secondaryColor2 : Colors.grey,
+                ),
+                selectTab == 3,
+                () {
+                  setState(() {
+                    selectTab = 3;
+                    currentTab = SessionSummaryScreen(eObj: {"name": "Training summary"});
+                  });
+                },
+              ),
+              buildTabIcon(
+                Icon(
+                  Icons.person,
+                  color: selectTab == 4 ? TColor.secondaryColor2 : Colors.grey,
+                ),
+                selectTab == 4,
+                () {
+                  setState(() {
+                    selectTab = 4;
+                    currentTab = const ProfileView();
+                  });
+                },
+              ),
             ],
           ),
         ),

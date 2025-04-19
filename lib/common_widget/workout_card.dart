@@ -1,91 +1,59 @@
 import 'package:fast_rhino/common_widget/workout_chart.dart';
-import 'package:fast_rhino/helpers/graph_parser.dart';
 import 'package:fast_rhino/models/Workout/workout.dart';
 import 'package:flutter/material.dart';
+import '../helpers/workout_parser.dart';
+
 class WorkoutCard extends StatelessWidget {
   final Workout workout;
 
- 
   const WorkoutCard({super.key, required this.workout});
 
   @override
   Widget build(BuildContext context) {
+    final intervals = parseWorkoutXml(workout.xml);
+
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      margin: const EdgeInsets.symmetric(horizontal: 2, ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          )
-        ],
+        boxShadow: const [BoxShadow(color: Color.fromARGB(40, 0, 0, 0), blurRadius: 10, offset: Offset(0, 4))],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 🔺 Placeholder for workout visual
- WorkoutGraph(data: extractWorkoutGraphData(workout.xml)),
-
-
-          // 🧠 Workout details
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  workout.name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  workout.description,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 13,
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                // 🕒 Duration & TSS
-                Row(
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.access_time, size: 16, color: Colors.blueAccent),
-                        const SizedBox(width: 6),
-                        Text(
-                          "${workout.durationMinutes}min",
-                          style: const TextStyle(color: Colors.blueAccent),
-                        )
-                      ],
-                    ),
-                    const SizedBox(width: 20),
-                    Row(
-                      children: [
-                        const Icon(Icons.fitness_center, size: 16, color: Colors.blueAccent),
-                        const SizedBox(width: 6),
-                        Text(
-                          "TSS: ${workout.tss}",
-                          style: const TextStyle(color: Colors.blueAccent),
-                        )
-                      ],
-                    ),
-                  ],
-                )
-              ],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              color: Colors.white,
+              child: WorkoutGraphBar(intervals: intervals),
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(workout.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 6),
+                  Text(workout.description, maxLines: 2, overflow: TextOverflow.ellipsis),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const Icon(Icons.timer, size: 16, color: Colors.blue),
+                      const SizedBox(width: 6),
+                      Text('${workout.durationMinutes} min'),
+                      const SizedBox(width: 16),
+                      const Icon(Icons.flash_on, size: 16, color: Colors.orange),
+                      const SizedBox(width: 6),
+                      Text('TSS: ${workout.tss}'),
+                    ],
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

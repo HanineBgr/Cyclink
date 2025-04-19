@@ -1,7 +1,8 @@
+import 'dart:math' as math;
 import 'package:fast_rhino/services/bluetooth/bluetooth_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'dart:math' as math;
+import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
+import '../../common/colo_extension.dart';
 
 class BluetoothScreen extends StatefulWidget {
   @override
@@ -10,10 +11,12 @@ class BluetoothScreen extends StatefulWidget {
 
 class _BluetoothScreenState extends State<BluetoothScreen>
     with SingleTickerProviderStateMixin {
-  final BLEService bleService = BLEService();
-  List<ScanResult> scanResults = [];
-  bool isScanning = false;
+  final FlutterReactiveBle _ble = FlutterReactiveBle();
+  final FtmsController ftmsController = FtmsController();
+
   late AnimationController _controller;
+  List<DiscoveredDevice> devices = [];
+  bool isScanning = false;
 
   @override
   void initState() {
@@ -26,36 +29,33 @@ class _BluetoothScreenState extends State<BluetoothScreen>
   @override
   void dispose() {
     _controller.dispose();
+    ftmsController.dispose();
     super.dispose();
   }
 
   void startScan() async {
     setState(() {
       isScanning = true;
-      scanResults.clear();
+      devices.clear();
     });
 
-    bleService.scanDevices().listen((results) {
-      setState(() {
-        scanResults = results;
-      });
-
-      for (var result in results) {
-        print("Found device: ${result.device.name} - ${result.device.id}");
+    _ble.scanForDevices(withServices: []).listen((device) {
+      if (!devices.any((d) => d.id == device.id)) {
+        setState(() {
+          devices.add(device);
+        });
       }
     });
 
-    // Stop scan after delay
-    await Future.delayed(Duration(seconds: 6));
-    FlutterBluePlus.stopScan();
+    await Future.delayed(Duration(seconds: 10));
     setState(() {
       isScanning = false;
     });
   }
 
-  void connectToDevice(BluetoothDevice device) async {
+  void connectToDevice(DiscoveredDevice device) async {
     try {
-      await bleService.connectToDevice(device);
+      await ftmsController.connectToTrainer(device.id);
       showSuccessDialog(device.name);
     } catch (e) {
       print("Connection failed: $e");
@@ -74,12 +74,7 @@ class _BluetoothScreenState extends State<BluetoothScreen>
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 20,
-                ),
-              ],
+              boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 20)],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -90,36 +85,28 @@ class _BluetoothScreenState extends State<BluetoothScreen>
                   child: Icon(Icons.check, color: Colors.white, size: 32),
                 ),
                 const SizedBox(height: 16),
-                Text(
-                  'Connected!',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.lightBlueAccent,
-                  ),
-                ),
+                Text('Connected!',
+                    style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.lightBlueAccent)),
                 const SizedBox(height: 8),
-                Text(
-                  'Connected to $deviceName',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                ),
+                Text('Connected to $deviceName',
+                    textAlign: TextAlign.center,
+                    style:
+                        TextStyle(fontSize: 14, color: Colors.grey[600])),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFFB8E0FF),
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 32, vertical: 12),
+                        borderRadius: BorderRadius.circular(25)),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                   ),
                   onPressed: () {
-                    Navigator.of(context).pop(); // close dialog
+                    Navigator.of(context).pop();
                   },
                   child: Text('Continue'),
                 )
@@ -141,36 +128,25 @@ class _BluetoothScreenState extends State<BluetoothScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-                  Text(
-                    "Bluetooth Connection",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
-                      color: Colors.black,
-                    ),
-                  ),
+                  Text("Bluetooth Connection",
+                      style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                          color: Colors.black)),
                   Icon(Icons.more_horiz, size: 20),
                 ],
               ),
               const SizedBox(height: 32),
-
-              // Info text
               Text(
                 "Make sure your FTMS simulator is nearby and not already connected.",
                 textAlign: TextAlign.start,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[800],
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey[800]),
               ),
               const SizedBox(height: 32),
-
-              // Scanning animation
               if (isScanning)
                 SizedBox(
                   height: 220,
@@ -183,79 +159,59 @@ class _BluetoothScreenState extends State<BluetoothScreen>
                       );
                     },
                   ),
-                )
-              else
-                SizedBox(height: 0),
-
+                ),
               const SizedBox(height: 16),
-
-              // Device list
               Expanded(
                 child: ListView.builder(
-                  itemCount: scanResults.length,
+                  itemCount: devices.length,
                   itemBuilder: (_, index) {
-                    final result = scanResults[index];
-                    final device = result.device;
+                    final device = devices[index];
                     return Card(
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
+                          borderRadius: BorderRadius.circular(16)),
                       margin: EdgeInsets.symmetric(vertical: 8),
                       child: ListTile(
                         title: Text(
-                          device.name.isNotEmpty
-                              ? device.name
-                              : 'Unnamed device',
-                        ),
-                        subtitle: Text(device.id.toString()),
+                            device.name.isNotEmpty
+                                ? device.name
+                                : 'Unnamed device'),
+                        subtitle: Text(device.id),
                         trailing: ElevatedButton(
                           child: Text('Connect'),
-                          onPressed: () {
-                            connectToDevice(device);
-                          },
+                          onPressed: () => connectToDevice(device),
                         ),
                       ),
                     );
                   },
                 ),
               ),
-
               const SizedBox(height: 16),
-
-              // Scan button
               GestureDetector(
-                onTap: () {
-                  startScan();
-                },
+                onTap: startScan,
                 child: Container(
                   width: double.infinity,
                   height: 50,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [
-                        Color(0xFF80D0FF),
-                        Color(0xFF7285FF),
-                      ],
+                      colors: [Color(0xFF80D0FF), Color(0xFF7285FF)],
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
                     ),
                     borderRadius: BorderRadius.circular(25),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 10,
-                        offset: Offset(0, 4),
-                      )
+                          color: Colors.black12,
+                          blurRadius: 10,
+                          offset: Offset(0, 4))
                     ],
                   ),
                   child: Center(
                     child: Text(
                       isScanning ? 'Scanning...' : 'Scan',
                       style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16),
                     ),
                   ),
                 ),
@@ -269,7 +225,6 @@ class _BluetoothScreenState extends State<BluetoothScreen>
   }
 }
 
-// Custom ripple animation painter
 class RipplePainter extends CustomPainter {
   final double animationValue;
   RipplePainter(this.animationValue);
@@ -303,5 +258,3 @@ class RipplePainter extends CustomPainter {
     return animationValue != oldDelegate.animationValue;
   }
 }
-
-

@@ -1,56 +1,40 @@
+import 'package:fast_rhino/services/bluetooth/bluetooth_service.dart';
 import 'package:flutter/material.dart';
-
 import '../common/colo_extension.dart';
-import '../view/Workout/trainingSession.dart';
+import '../models/Workout/workout.dart';
+// import '../view/Workout/trainingSession.dart';
 
 class SessionSliderCard extends StatelessWidget {
-  const SessionSliderCard({super.key});
+  final Workout workout;
+  final FtmsController ftmsController;
+
+  const SessionSliderCard({
+    super.key,
+    required this.workout,
+    required this.ftmsController,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Center(
-          child: const Text(
-            "Start your session",
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF151531),
-            ),
+    return Center(
+      child: ElevatedButton.icon(
+        onPressed: () {
+          // You can add your navigation logic here
+          // Navigator.push(...);
+          print('Start workout: ${workout.name}');
+        },
+        icon: const Icon(Icons.play_arrow),
+        label: const Text("Start Workout"),
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+          backgroundColor: TColor.primaryColor1,
+          foregroundColor: Colors.white,
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
           ),
         ),
-        const SizedBox(height: 2),
-
-        /// Stack to center play icon only
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(),
-                ),
-              ],
-            ),
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) =>  TrainingSessionScreen(eObj: {"name": "Training session"})),
-                );
-              },
-              child: Icon(
-                Icons.play_arrow,
-                size: 70,
-                color: TColor.primaryColor1,
-              ),
-            ),
-          ],
-        ),
-      ],
+      ),
     );
   }
 }
