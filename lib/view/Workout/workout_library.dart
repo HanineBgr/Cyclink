@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:fast_rhino/common_widget/slider_card.dart';
 import 'package:fast_rhino/common_widget/step_detail_row.dart';
 import 'package:fast_rhino/common_widget/workout_chart.dart';
@@ -11,6 +12,7 @@ import 'package:fast_rhino/common_widget/workout_card.dart';
 import 'package:fast_rhino/models/Workout/workout.dart';
 import 'package:readmore/readmore.dart';
 import 'package:xml/xml.dart';
+import 'package:fast_rhino/providers/auth_provider.dart';
 import '../../common/colo_extension.dart';
 
 class WorkoutLibrary extends StatefulWidget {
@@ -93,8 +95,22 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
         backgroundColor: TColor.white,
         centerTitle: true,
         elevation: 0,
-        leading: BackButton(color: TColor.black),
-        title: Text("Workout Library", style: TextStyle(color: TColor.black, fontSize: 18, fontWeight: FontWeight.bold)),
+        automaticallyImplyLeading: false,
+        leading: selectedWorkout != null
+            ? IconButton(
+                icon: Icon(Icons.arrow_back, color: TColor.black),
+                onPressed: () {
+                  setState(() {
+                    selectedWorkout = null;
+                    essentialSteps.clear();
+                  });
+                },
+              )
+            : null,
+        title: Text(
+          selectedWorkout == null ? "Workout Library" : selectedWorkout!.name,
+          style: TextStyle(color: TColor.black, fontSize: 18, fontWeight: FontWeight.bold),
+        ),
       ),
       body: Column(
         children: [
@@ -107,6 +123,95 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildWorkoutList(List<Workout> workouts) {
+    return Column(
+      children: workouts.map((workout) {
+        return GestureDetector(
+          onTap: () {
+            setState(() {
+              selectedWorkout = workout;
+              intervals = parseWorkoutXml(workout.xml);
+              _parseEssentialSteps(workout.xml);
+            });
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: WorkoutCard(workout: workout),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildWorkoutDetail(BuildContext context) {
+    final ftp = Provider.of<AuthProvider>(context).ftp.toDouble();
+    print("FTP: $ftp");
+
+    double sum4thPower = 0;
+    int totalSeconds = 0;
+
+    for (var interval in intervals) {
+      final watts = (interval.power / 100.0) * ftp;
+      final durationSeconds = (interval.duration * 60).toInt();
+      sum4thPower += durationSeconds * math.pow(watts, 4);
+      totalSeconds += durationSeconds;
+    }
+
+    final np = totalSeconds > 0 ? math.pow(sum4thPower / totalSeconds, 0.25) : 0.0;
+    final ifFactor = ftp > 0 ? np / ftp : 0.0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 8),
+        ReadMoreText(
+          textAlign: TextAlign.justify,
+          selectedWorkout!.description,
+          colorClickableText: TColor.primaryColor1,
+          style: TextStyle(color: TColor.gray, fontSize: 14),
+        ),
+        const SizedBox(height: 25),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _buildMetricTile("Duration", "${selectedWorkout!.durationMinutes} min", Icons.timer),
+            _buildMetricTile("TSS", selectedWorkout!.tss.toString(), Icons.bolt),
+            _buildMetricTile("NP", np.toStringAsFixed(0), Icons.bar_chart),
+            _buildMetricTile("IF", ifFactor.toStringAsFixed(2), Icons.speed),
+          ],
+        ),
+        const SizedBox(height: 30),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text("Workout Structure", style: TextStyle(color: TColor.black, fontSize: 16, fontWeight: FontWeight.w700)),
+            Text("${essentialSteps.length} Steps", style: TextStyle(color: TColor.gray, fontSize: 12)),
+          ],
+        ),
+        const SizedBox(height: 10),
+        ...essentialSteps.asMap().entries.map((entry) {
+          final index = entry.key;
+          final step = entry.value;
+          return StepDetailRow(
+            sObj: {
+              "no": "${index + 1}".padLeft(2, "0"),
+              "title": step["title"]!,
+              "detail": step["detail"]!,
+            },
+            isLast: index == essentialSteps.length - 1,
+          );
+        }).toList(),
+        const SizedBox(height: 25),
+        Text("Power Graph", style: TextStyle(color: TColor.black, fontSize: 16, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 10),
+        WorkoutGraphBar(intervals: intervals),
+        const SizedBox(height: 20),
+        SessionSliderCard(workout: selectedWorkout!, ftmsController: ftmsController),
+        const SizedBox(height: 20),
+      ],
     );
   }
 
@@ -166,84 +271,6 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildWorkoutList(List<Workout> workouts) {
-    return Column(
-      children: workouts.map((workout) {
-        return GestureDetector(
-          onTap: () {
-            setState(() {
-              selectedWorkout = workout;
-              intervals = parseWorkoutXml(workout.xml);
-              _parseEssentialSteps(workout.xml);
-            });
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: WorkoutCard(workout: workout),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildWorkoutDetail(BuildContext context) {
-    final media = MediaQuery.of(context).size;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(selectedWorkout!.name,
-            style: TextStyle(color: TColor.black, fontSize: 18, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 8),
-        ReadMoreText(
-          textAlign: TextAlign.justify,
-          selectedWorkout!.description,
-          colorClickableText: TColor.primaryColor1,
-          style: TextStyle(
-            color: TColor.gray, fontSize: 14),
-        ),
-        const SizedBox(height: 25),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildMetricTile("Duration", "${selectedWorkout!.durationMinutes} min", Icons.timer),
-            const SizedBox(width: 40),
-            _buildMetricTile("TSS", selectedWorkout!.tss.toString(), Icons.bolt),
-          ],
-        ),
-        const SizedBox(height: 30),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text("Workout Structure",
-                style: TextStyle(color: TColor.black, fontSize: 16, fontWeight: FontWeight.w700)),
-            Text("${essentialSteps.length} Steps", style: TextStyle(color: TColor.gray, fontSize: 12)),
-          ],
-        ),
-        const SizedBox(height: 10),
-        ...essentialSteps.asMap().entries.map((entry) {
-          final index = entry.key;
-          final step = entry.value;
-          return StepDetailRow(
-            sObj: {
-              "no": "${index + 1}".padLeft(2, "0"),
-              "title": step["title"]!,
-              "detail": step["detail"]!,
-            },
-            isLast: index == essentialSteps.length - 1,
-          );
-        }).toList(),
-        const SizedBox(height: 25),
-        Text("Power Graph",
-            style: TextStyle(color: TColor.black, fontSize: 16, fontWeight: FontWeight.w700)),
-        const SizedBox(height: 10),
-        WorkoutGraphBar(intervals: intervals),
-        const SizedBox(height: 20),
-        SessionSliderCard(workout: selectedWorkout!, ftmsController: ftmsController),
-        const SizedBox(height: 20),
-      ],
     );
   }
 

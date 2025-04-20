@@ -8,7 +8,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'common/colo_extension.dart';
 import 'providers/auth_provider.dart';
-import 'view/on_boarding/on_boarding_view.dart';
 import 'view/main_tab/main_tab_view.dart';
 
 void main() async {

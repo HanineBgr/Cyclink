@@ -5,7 +5,6 @@ import 'package:fast_rhino/common/colo_extension.dart';
 import 'package:fast_rhino/common_widget/round_button.dart';
 import 'package:fast_rhino/common_widget/round_textfield.dart';
 import 'package:fast_rhino/view/auth/signUp1.dart';
-import 'package:fast_rhino/view/home/home_view.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -39,7 +38,7 @@ class _LoginViewState extends State<LoginView> {
   }
 
   Future<void> _handleLogin() async {
-    if (_isLoading) return; 
+    if (_isLoading) return;
 
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
@@ -55,7 +54,6 @@ class _LoginViewState extends State<LoginView> {
 
     try {
       final response = await AuthService.signIn(email: email, password: password);
-      print('Login Success: $response');
 
       if (!mounted) return;
       Navigator.pushReplacement(
@@ -63,8 +61,16 @@ class _LoginViewState extends State<LoginView> {
         MaterialPageRoute(builder: (context) => const MainTabView()),
       );
     } catch (e) {
+      // 👇 Customize error message shown to user
+      String errorMessage = 'Login failed. Please try again.';
+      if (e.toString().toLowerCase().contains('unauthorized') ||
+          e.toString().toLowerCase().contains('401') ||
+          e.toString().toLowerCase().contains('invalid')) {
+        errorMessage = 'Incorrect email or password. Please try again.';
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed: ${e.toString()}')),
+        SnackBar(content: Text(errorMessage)),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -158,7 +164,6 @@ class _LoginViewState extends State<LoginView> {
                     ),
 
                     SizedBox(height: media.width * 0.04),
-
                     TextButton(
                       onPressed: () {
                         Navigator.push(context, MaterialPageRoute(builder: (context) => const SignUpView()));

@@ -34,19 +34,29 @@ class WorkoutCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(workout.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  Text(workout.name, 
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 16, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 6),
-                  Text(workout.description, maxLines: 2, overflow: TextOverflow.ellipsis),
+                  Text(workout.description, maxLines: 2, 
+                  style: const TextStyle(color: Color.fromARGB(136, 54, 54, 54), fontSize: 14),
+                  overflow: TextOverflow.ellipsis),
                   const SizedBox(height: 12),
                   Row(
                     children: [
                       const Icon(Icons.timer, size: 16, color: Colors.blue),
                       const SizedBox(width: 6),
-                      Text('${workout.durationMinutes} min'),
+                      Text('${workout.durationMinutes} min',
+                      style: TextStyle(color: const Color.fromARGB(255, 48, 48, 48), fontSize: 14),
+                      
+                      ),
                       const SizedBox(width: 16),
                       const Icon(Icons.flash_on, size: 16, color: Colors.orange),
                       const SizedBox(width: 6),
-                      Text('TSS: ${workout.tss}'),
+                      Text('TSS: ${workout.tss}', 
+                      style: TextStyle(color: const Color.fromARGB(255, 48, 48, 48), fontSize: 14),
+                      ),
                     ],
                   )
                 ],
