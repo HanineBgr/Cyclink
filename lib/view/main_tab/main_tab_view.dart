@@ -1,3 +1,4 @@
+import 'package:fast_rhino/view/Workout/trainingSession.dart';
 import 'package:fast_rhino/view/planning/planning_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -98,7 +99,7 @@ class _MainTabViewState extends State<MainTabView> {
                 () {
                   setState(() {
                     selectTab = 2;
-                    // Add any widget you want to show in tab 2
+                    // currentTab = LiveSessionScreen();
                   });
                 },
               ),

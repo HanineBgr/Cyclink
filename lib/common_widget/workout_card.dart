@@ -13,7 +13,7 @@ class WorkoutCard extends StatelessWidget {
     final intervals = parseWorkoutXml(workout.xml);
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 8), // vertical margin for spacing
+      margin: const EdgeInsets.symmetric(horizontal: 2, ), 
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
@@ -29,16 +29,15 @@ class WorkoutCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min, // 👈 ensures flexible height
+          mainAxisSize: MainAxisSize.min, 
           children: [
-            /// Graph Section - moved down further
             Container(
-              margin: const EdgeInsets.only(top: 5), // more space above graph
+              margin: const EdgeInsets.only(top: 5), 
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               color: Colors.white,
-              child: WorkoutGraphBar(intervals: intervals, maxHeight: 60),
+              child: WorkoutGraphBar(intervals: intervals, maxHeight: 30),
             ),
-
+SizedBox(height: 5,),
             /// Text Section
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),

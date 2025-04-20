@@ -1,190 +1,170 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:fast_rhino/models/Workout/workout.dart';
+import 'dart:math' as math;
+import 'package:fast_rhino/models/Workout/interval.dart';
 import 'package:fast_rhino/services/bluetooth/bluetooth_service.dart';
-import 'package:fast_rhino/common/colo_extension.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class LiveSessionScreen extends StatefulWidget {
-  final Workout workout;
+  final List<WorkoutInterval> intervals;
   final FtmsController ftmsController;
 
-  const LiveSessionScreen({
-    super.key,
-    required this.workout,
-    required this.ftmsController,
-  });
+  const LiveSessionScreen({super.key, required this.intervals, required this.ftmsController});
 
   @override
   State<LiveSessionScreen> createState() => _LiveSessionScreenState();
 }
 
 class _LiveSessionScreenState extends State<LiveSessionScreen> {
-  int targetPower = 100;
+  int elapsedSeconds = 0;
+  double targetPower = 0;
   int currentPower = 0;
   int heartRate = 0;
   int cadence = 0;
-  double speed = 0.0;
-  int intervalIndex = 1;
-  Duration elapsed = Duration.zero;
-  Duration totalDuration = Duration(minutes: 45);
-
-  Timer? _timer;
+  int currentIntervalIndex = 0;
+  Timer? timer;
 
   @override
   void initState() {
     super.initState();
-    widget.ftmsController.onPowerReceived = (val) {
-      setState(() => currentPower = val);
-    };
-    widget.ftmsController.onCadenceReceived = (val) {
-      setState(() => cadence = val);
-    };
-    widget.ftmsController.onHeartRateReceived = (val) {
-      setState(() => heartRate = val);
-    };
+    widget.ftmsController.onPowerReceived = (val) => setState(() => currentPower = val);
+    widget.ftmsController.onHeartRateReceived = (val) => setState(() => heartRate = val);
+    widget.ftmsController.onCadenceReceived = (val) => setState(() => cadence = val);
+    startSession();
+  }
 
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+  void startSession() {
+    timer = Timer.periodic(const Duration(seconds: 1), (_) {
       setState(() {
-        elapsed += const Duration(seconds: 1);
+        elapsedSeconds++;
+        double cumulative = 0;
+        for (int i = 0; i < widget.intervals.length; i++) {
+          cumulative += widget.intervals[i].duration * 60;
+          if (elapsedSeconds <= cumulative) {
+            currentIntervalIndex = i;
+            targetPower = widget.intervals[i].power;
+            break;
+          }
+        }
       });
     });
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
+    timer?.cancel();
     widget.ftmsController.dispose();
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final remaining = totalDuration - elapsed;
-    return Scaffold(
-      backgroundColor: const Color(0xFF111B2E),
-      body: SafeArea(
+  Widget _buildTile(String label, String value, String sub) {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 6),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white24),
+        ),
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.arrow_back, color: Colors.white),
-                      const Spacer(),
-                      Text(widget.workout.name,
-                          style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                      const Spacer(),
-                      const Icon(Icons.close, color: Colors.white),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(widget.workout.description,
-                      style: const TextStyle(color: Colors.white70, fontSize: 13)),
-                ],
-              ),
-            ),
-
-            GridView.count(
-              crossAxisCount: 3,
-              shrinkWrap: true,
-              childAspectRatio: 1.7,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                _buildTile("TARGET", "$targetPower W", "40%"),
-                _buildTile("POWER", "$currentPower W", ""),
-                _buildTile("HEART RATE", "$heartRate", "ZONE Z1"),
-                _buildTile("TARGET", "85 rpm", "rpm"),
-                _buildTile("CADENCE", "$cadence rpm", ""),
-                _buildTile("SPEED", "${speed.toStringAsFixed(1)}", "AVG 7.7 km/h"),
-              ],
-            ),
-
+            Text(label.toUpperCase(), style: GoogleFonts.poppins(color: Colors.white70, fontSize: 12)),
             const SizedBox(height: 8),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _infoText("INTERVAL", "$intervalIndex/11"),
-                _infoText("REMAINING", _formatDuration(remaining)),
-                _infoText("ELAPSED", _formatDuration(elapsed)),
-                _infoText("TOTAL", _formatDuration(totalDuration)),
-              ],
-            ),
-
-            const SizedBox(height: 10),
-            LinearProgressIndicator(
-              value: elapsed.inSeconds / totalDuration.inSeconds,
-              minHeight: 6,
-              color: Colors.lightBlueAccent,
-              backgroundColor: Colors.grey[800],
-            ),
-
-            const SizedBox(height: 20),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              //child: LiveWorkoutGraph(), // create this widget to mimic the bar chart
-            ),
-
-            const Spacer(),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _bottomButton("ERG", Colors.indigo),
-                  _bottomButton("INTENSITY\n100%", Colors.green),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
+            Text(value, style: GoogleFonts.poppins(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+            if (sub.isNotEmpty)
+              Text(sub, style: GoogleFonts.poppins(color: Colors.white38, fontSize: 12)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTile(String title, String value, String sub) {
-    return Container(
-      margin: const EdgeInsets.all(6),
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.blueGrey[900],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: const TextStyle(color: Colors.white70, fontSize: 10)),
-          const SizedBox(height: 4),
-          Text(value, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-          Text(sub, style: const TextStyle(color: Colors.lightBlue, fontSize: 10)),
-        ],
+  Widget _buildWorkoutChart() {
+    final intervals = widget.intervals;
+    final maxPower = intervals.map((e) => e.power).reduce(math.max);
+
+    return SizedBox(
+      height: 100,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: intervals.map((interval) {
+          final heightFactor = interval.power / maxPower;
+          final width = interval.duration * 6; // scale for visual clarity
+          final color = Colors.orangeAccent;
+          return Container(
+            width: width,
+            height: 100 * heightFactor,
+            margin: const EdgeInsets.symmetric(horizontal: 1),
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
 
-  Widget _infoText(String title, String value) {
-    return Column(
-      children: [
-        Text(title, style: const TextStyle(color: Colors.white70, fontSize: 10)),
-        Text(value, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600)),
-      ],
-    );
-  }
+  @override
+  Widget build(BuildContext context) {
+    final totalDuration = widget.intervals.fold<double>(0, (sum, i) => sum + i.duration * 60);
+    final remaining = totalDuration - elapsedSeconds;
 
-  Widget _bottomButton(String label, Color bg) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 24),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(16),
+    return Scaffold(
+      backgroundColor: const Color(0xFF101828),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Text("Live Workout",
+                  style: GoogleFonts.poppins(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+              ),
+              const SizedBox(height: 16),
+              _buildWorkoutChart(),
+              const SizedBox(height: 12),
+              LinearProgressIndicator(
+                value: elapsedSeconds / totalDuration,
+                backgroundColor: Colors.white24,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.orangeAccent),
+              ),
+              const SizedBox(height: 20),
+              Row(children: [
+                _buildTile("TARGET", "${targetPower.toInt()} W", "Zone"),
+                _buildTile("POWER", "$currentPower W", ""),
+              ]),
+              const SizedBox(height: 12),
+              Row(children: [
+                _buildTile("HEART RATE", "$heartRate bpm", ""),
+                _buildTile("CADENCE", "$cadence rpm", ""),
+              ]),
+              const SizedBox(height: 12),
+              Row(children: [
+                _buildTile("SPEED", "${(cadence * 0.5).toStringAsFixed(1)} km/h", ""),
+              ]),
+              const Spacer(),
+              Text("Elapsed Time",
+                  style: GoogleFonts.poppins(color: Colors.white70, fontSize: 14)),
+              Text("${(elapsedSeconds ~/ 60).toString().padLeft(2, '0')}:${(elapsedSeconds % 60).toString().padLeft(2, '0')}",
+                  style: GoogleFonts.poppins(fontSize: 36, color: Colors.white, fontWeight: FontWeight.w600)),
+              const SizedBox(height: 30),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                  minimumSize: const Size(double.infinity, 50),
+                ),
+                child: const Text("End Session"),
+              ),
+            ],
+          ),
+        ),
       ),
-      child: Text(label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
     );
   }
-
-  String _formatDuration(Duration d) => d.toString().split('.').first.padLeft(5, "0");
 }

@@ -143,7 +143,7 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: WorkoutCard(workout: workout),
+            child: WorkoutCard(workout: workout, ),
           ),
         );
       }).toList(),
@@ -175,6 +175,9 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
           style: TextStyle(color: TColor.gray, fontSize: 14),
         ),
         const SizedBox(height: 25),
+         WorkoutGraphBar(intervals: intervals),
+         const SizedBox(height: 25),
+
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -205,11 +208,8 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
             isLast: index == essentialSteps.length - 1,
           );
         }).toList(),
+
         const SizedBox(height: 25),
-        Text("Power Graph", style: TextStyle(color: TColor.black, fontSize: 16, fontWeight: FontWeight.w700)),
-        const SizedBox(height: 10),
-        WorkoutGraphBar(intervals: intervals),
-        const SizedBox(height: 20),
         SessionSliderCard(workout: selectedWorkout!, ftmsController: ftmsController),
         const SizedBox(height: 20),
       ],
