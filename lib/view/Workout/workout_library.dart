@@ -33,6 +33,7 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
   void initState() {
     super.initState();
     Provider.of<WorkoutProvider>(context, listen: false).fetchWorkouts();
+    Provider.of<AuthProvider>(context, listen: false).fetchUser();
   }
 
   String _formatTime(int seconds) {
@@ -88,6 +89,7 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
   Widget build(BuildContext context) {
     final workoutProvider = Provider.of<WorkoutProvider>(context);
     final workouts = workoutProvider.workouts;
+    final authProvider = Provider.of<AuthProvider>(context);
 
     return Scaffold(
       backgroundColor: TColor.white,
@@ -112,17 +114,19 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
           style: TextStyle(color: TColor.black, fontSize: 18, fontWeight: FontWeight.bold),
         ),
       ),
-      body: Column(
-        children: [
-          if (selectedWorkout == null) _buildSearchBar(workoutProvider),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: selectedWorkout == null ? _buildWorkoutList(workouts) : _buildWorkoutDetail(context),
+      body: authProvider.ftp == 0
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                if (selectedWorkout == null) _buildSearchBar(workoutProvider),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: selectedWorkout == null ? _buildWorkoutList(workouts) : _buildWorkoutDetail(context, authProvider.ftp.toDouble()),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -146,10 +150,7 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
     );
   }
 
-  Widget _buildWorkoutDetail(BuildContext context) {
-    final ftp = Provider.of<AuthProvider>(context).ftp.toDouble();
-    print("FTP: $ftp");
-
+  Widget _buildWorkoutDetail(BuildContext context, double ftp) {
     double sum4thPower = 0;
     int totalSeconds = 0;
 
