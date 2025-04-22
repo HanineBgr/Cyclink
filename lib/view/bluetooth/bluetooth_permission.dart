@@ -2,48 +2,47 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:fast_rhino/view/bluetooth/bluetooth_settings.dart';
 
-Future<void> showBluetoothPermissionDialog(BuildContext context, Function(String trainerId) onConnected) async {
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: const Text("Bluetooth Permission Required"),
-        content: const Text(
-            "To connect to your trainer and measure performance, we need Bluetooth permissions. Please allow to proceed."),
-        actions: [
-          TextButton(
-            child: const Text("Cancel"),
-            onPressed: () => Navigator.pop(context),
-          ),
-          ElevatedButton(
-            child: const Text("Allow"),
-            onPressed: () async {
-              Navigator.pop(context); // Close permission popup
+Future<void> requestBluetoothPermissions() async {
+  final statuses = await [
+    Permission.bluetoothScan,
+    Permission.bluetoothConnect,
+    Permission.bluetoothAdvertise,
+    Permission.locationWhenInUse,
+  ].request();
 
-              final statuses = await [
-                Permission.bluetoothScan,
-                Permission.bluetoothConnect,
-                Permission.bluetoothAdvertise,
-                Permission.locationWhenInUse,
-              ].request();
-
-              final allGranted = statuses.values.every((status) => status.isGranted);
-
-              if (allGranted) {
-                // Now show the scan popup dialog
-                showDialog(
-                  context: context,
-                  builder: (_) => BluetoothPopupDialog(onConnected: onConnected),
-                );
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Bluetooth permissions are required.")),
-                );
-              }
-            },
-          ),
-        ],
-      );
-    },
-  );
+  if (statuses.values.any((status) => !status.isGranted)) {
+    print("Some permissions denied");
+  }
 }
+
+Future<void> showSystemLevelBluetoothFlow(BuildContext context, Function(String trainerId) onConnected) async {
+  await requestBluetoothPermissions();
+
+  // If all permissions are granted, show the actual scan/connect popup
+  final allGranted = await Future.wait([
+    Permission.bluetoothScan.status,
+    Permission.bluetoothConnect.status,
+    Permission.bluetoothAdvertise.status,
+    Permission.locationWhenInUse.status,
+  ]);
+
+  if (allGranted.every((status) => status.isGranted)) {
+    showDialog(
+      context: context,
+      builder: (_) => BluetoothPopupDialog(onConnected: onConnected),
+    );
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Bluetooth permissions are required.")),
+    );
+  }
+} 
+
+/// Use this call inside your button:
+/// 
+/// ElevatedButton(
+///   onPressed: () => showSystemLevelBluetoothFlow(context, (trainerId) {
+///     // Proceed to next screen or logic
+///   }),
+///   child: Text("Connect Trainer"),
+/// )

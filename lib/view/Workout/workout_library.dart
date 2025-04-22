@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 import 'package:fast_rhino/common_widget/search_bar.dart';
-import 'package:fast_rhino/common_widget/slider_card.dart';
+import 'package:fast_rhino/common_widget/workoutButton.dart';
 import 'package:fast_rhino/common_widget/step_detail_row.dart';
 import 'package:fast_rhino/common_widget/workout_chart.dart';
 import 'package:fast_rhino/helpers/workout_parser.dart';

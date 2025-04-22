@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:fast_rhino/common/colo_extension.dart';
-import 'package:fast_rhino/common_widget/slider_card.dart';
+import 'package:fast_rhino/common_widget/workoutButton.dart';
 import 'package:fast_rhino/common_widget/step_detail_row.dart';
 import 'package:fast_rhino/common_widget/workout_chart.dart';
 import 'package:fast_rhino/models/Workout/interval.dart';
@@ -85,7 +85,7 @@ class WorkoutDetailView extends StatelessWidget {
           );
         }).toList(),
         const SizedBox(height: 25),
-        SessionSliderCard(workout: workout, ftmsController: ftmsController),
+        startWorkoutButton(workout: workout, ftmsController: ftmsController),
         const SizedBox(height: 20),
       ],
     );

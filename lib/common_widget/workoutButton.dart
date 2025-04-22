@@ -1,63 +1,42 @@
 import 'package:fast_rhino/services/bluetooth/bluetooth_service.dart';
 import 'package:fast_rhino/view/bluetooth/bluetooth_settings.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../common/colo_extension.dart';
 import '../helpers/workout_parser.dart';
 import '../models/Workout/workout.dart';
 import '../view/Workout/trainingSession.dart';
-import 'package:permission_handler/permission_handler.dart';
 
-class SessionSliderCard extends StatelessWidget {
+class startWorkoutButton extends StatelessWidget {
   final Workout workout;
   final FtmsController ftmsController;
 
-  const SessionSliderCard({
+  const startWorkoutButton({
     super.key,
     required this.workout,
     required this.ftmsController,
   });
 
-  Future<void> _showBluetoothPermissionDialog(BuildContext context) async {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Bluetooth Permission Required"),
-        content: const Text(
-            "To start your workout, the app needs permission to access Bluetooth. Do you want to continue?"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context), // Cancel
-            child: const Text("Cancel"),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context); // Close dialog
-              final granted = await _requestBluetoothPermissions(context);
-              if (granted) {
-                _showBluetoothPopup(context);
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("Bluetooth permissions are required to start a workout."),
-                  ),
-                );
-              }
-            },
-            child: const Text("Continue"),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<bool> _requestBluetoothPermissions(BuildContext context) async {
-    final statuses = await [
-      Permission.bluetoothConnect,
+  Future<void> _handleBluetoothFlow(BuildContext context) async {
+    // 🔐 Request system-level Bluetooth permissions
+    final permissions = await [
       Permission.bluetoothScan,
+      Permission.bluetoothConnect,
       Permission.bluetoothAdvertise,
+      Permission.locationWhenInUse, 
     ].request();
 
-    return statuses.values.every((status) => status.isGranted);
+    final allGranted = permissions.values.every((status) => status.isGranted);
+
+    if (allGranted) {
+      _showBluetoothPopup(context);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Bluetooth permissions are required to start a workout."),
+        ),
+      );
+    }
   }
 
   void _showBluetoothPopup(BuildContext context) {
@@ -65,7 +44,7 @@ class SessionSliderCard extends StatelessWidget {
       context: context,
       builder: (_) => BluetoothPopupDialog(
         onConnected: (trainerId) {
-          Navigator.pop(context); // Close popup
+          Navigator.pop(context); // close popup
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -84,7 +63,7 @@ class SessionSliderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: ElevatedButton.icon(
-        onPressed: () => _showBluetoothPermissionDialog(context),
+        onPressed: () => _handleBluetoothFlow(context),
         icon: const Icon(Icons.play_arrow),
         label: const Text("Start Workout"),
         style: ElevatedButton.styleFrom(
