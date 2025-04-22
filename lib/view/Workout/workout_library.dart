@@ -8,6 +8,7 @@ import 'package:fast_rhino/providers/workout_provider.dart';
 import 'package:fast_rhino/services/bluetooth/bluetooth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fast_rhino/common_widget/workout_card.dart';
 import 'package:fast_rhino/models/Workout/workout.dart';
 import 'package:readmore/readmore.dart';
@@ -32,8 +33,14 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
   @override
   void initState() {
     super.initState();
+    _saveLastScreen(); // ✅ Sauvegarde du screen
     Provider.of<WorkoutProvider>(context, listen: false).fetchWorkouts();
     Provider.of<AuthProvider>(context, listen: false).fetchUser();
+  }
+
+  Future<void> _saveLastScreen() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('lastScreen', 'WorkoutLibrary');
   }
 
   String _formatTime(int seconds) {
@@ -143,7 +150,7 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: WorkoutCard(workout: workout, ),
+            child: WorkoutCard(workout: workout),
           ),
         );
       }).toList(),
@@ -175,9 +182,8 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
           style: TextStyle(color: TColor.gray, fontSize: 14),
         ),
         const SizedBox(height: 25),
-         WorkoutGraphBar(intervals: intervals),
-         const SizedBox(height: 25),
-
+        WorkoutGraphBar(intervals: intervals),
+        const SizedBox(height: 25),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -208,7 +214,6 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
             isLast: index == essentialSteps.length - 1,
           );
         }).toList(),
-
         const SizedBox(height: 25),
         SessionSliderCard(workout: selectedWorkout!, ftmsController: ftmsController),
         const SizedBox(height: 20),

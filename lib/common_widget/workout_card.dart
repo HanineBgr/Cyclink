@@ -37,7 +37,7 @@ class WorkoutCard extends StatelessWidget {
               color: Colors.white,
               child: WorkoutGraphBar(intervals: intervals, maxHeight: 30),
             ),
-SizedBox(height: 5,),
+            SizedBox(height: 5,),
             /// Text Section
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),

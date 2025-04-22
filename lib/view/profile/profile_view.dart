@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../common/colo_extension.dart';
 import '../../common_widget/profileCard.dart';
 import '../../common_widget/round_button.dart';
@@ -18,7 +20,14 @@ class _ProfileViewState extends State<ProfileView> {
   @override
   void initState() {
     super.initState();
+    _saveLastScreen(); // ✅ Ajout ici
     Provider.of<AuthProvider>(context, listen: false).fetchUser();
+  }
+
+  // ✅ Fonction pour sauvegarder le nom de l'écran
+  Future<void> _saveLastScreen() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('lastScreen', 'Profile');
   }
 
   @override
@@ -27,7 +36,7 @@ class _ProfileViewState extends State<ProfileView> {
     final user = authProvider.user;
 
     return Scaffold(
-     appBar: AppBar(
+      appBar: AppBar(
         backgroundColor: TColor.white,
         centerTitle: true,
         elevation: 0,
@@ -97,8 +106,7 @@ class _ProfileViewState extends State<ProfileView> {
                         const SizedBox(width: 15),
                         Expanded(
                           child: TitleSubtitleCell(
-                       title: "${calculateAge(user.dateOfBirth)}yo",
-
+                            title: "${calculateAge(user.dateOfBirth)}yo",
                             subtitle: "Age",
                           ),
                         ),
@@ -134,13 +142,12 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   int calculateAge(DateTime? birthDate) {
-  if (birthDate == null) return 0;
-  final today = DateTime.now();
-  int age = today.year - birthDate.year;
-  if (today.month < birthDate.month || (today.month == birthDate.month && today.day < birthDate.day)) {
-    age--;
+    if (birthDate == null) return 0;
+    final today = DateTime.now();
+    int age = today.year - birthDate.year;
+    if (today.month < birthDate.month || (today.month == birthDate.month && today.day < birthDate.day)) {
+      age--;
+    }
+    return age;
   }
-  return age;
-}
-
 }

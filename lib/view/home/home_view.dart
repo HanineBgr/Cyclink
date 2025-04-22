@@ -4,6 +4,8 @@ import 'package:fast_rhino/view/main_tab/main_tab_view.dart';
 import 'package:fast_rhino/view/profile/profile_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../common_widget/performance_chart.dart';
 import '../../common_widget/recent_activities.dart';
 import '../../common_widget/training_status.dart';
@@ -85,22 +87,27 @@ class HomeViewScreen extends StatelessWidget {
   Widget _buildHeader(BuildContext context, String userName) {
     return ListTile(
       leading: GestureDetector(
-        onTap: () {
+        onTap: () async {
+          await _saveLastScreen(); // ✅ Sauvegarde avant d'aller au profil
           MainTabView.of(context)?.setState(() {
             MainTabView.of(context)!.selectTab = 4;
             MainTabView.of(context)!.currentTab = const ProfileView();
           });
         },
-       child: const CircleAvatar(
-  backgroundImage: AssetImage('assets/img/user.png'),
-  backgroundColor: Color.fromARGB(0, 255, 244, 244),
-),
-
+        child: const CircleAvatar(
+          backgroundImage: AssetImage('assets/img/user.png'),
+          backgroundColor: Color.fromARGB(0, 255, 244, 244),
+        ),
       ),
       title: Text(
         'Welcome $userName!',
         style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
       ),
     );
+  }
+
+  Future<void> _saveLastScreen() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('lastScreen', 'HomeView');
   }
 }

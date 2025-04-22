@@ -24,7 +24,7 @@ class WorkoutGraphBar extends StatelessWidget {
           final powerRatio = interval.power / 100.0;
           final barHeight = powerRatio * maxHeight;
           final flex = (interval.duration / totalDuration * 1000).toInt();
-          final color = getZoneColor(interval.power); // assuming you have this function
+          final color = getZoneColor(interval.power); 
 
           return Expanded(
             flex: flex,

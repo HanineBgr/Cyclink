@@ -1,11 +1,10 @@
 import 'package:fast_rhino/providers/workout_provider.dart';
-import 'package:fast_rhino/view/Splash/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'common/colo_extension.dart';
 import 'providers/auth_provider.dart';
 import 'view/main_tab/main_tab_view.dart';
@@ -13,34 +12,37 @@ import 'view/main_tab/main_tab_view.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(const MyApp());
+
+  final startupScreen = await _determineInitialScreen();
+
+  runApp(AppWrapper(startScreen: startupScreen));
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+Future<Widget> _determineInitialScreen() async {
+  final storage = FlutterSecureStorage();
+  final prefs = await SharedPreferences.getInstance();
+  final token = await storage.read(key: 'token');
 
-  @override
-  State<MyApp> createState() => _MyAppState();
+  if (token != null) {
+    final lastScreen = prefs.getString('lastScreen');
+    final tabIndex = switch (lastScreen) {
+      'Profile' => 4,
+      'WorkoutLibrary' => 1,
+      'Planning' => 3,
+      'HomeView' => 0,
+      _ => 0,
+    };
+    return MainTabView(initialTabIndex: tabIndex);
+  }
+
+  // If no token → redirect to login/splash manually later
+  return MainTabView(); // or LoginScreen() if not connected
 }
 
-class _MyAppState extends State<MyApp> {
-  final storage = const FlutterSecureStorage();
-  Widget _initialScreen = const SplashScreen();
+class AppWrapper extends StatelessWidget {
+  final Widget startScreen;
 
-  @override
-  void initState() {
-    super.initState();
-    _checkLogin();
-  }
-
-  void _checkLogin() async {
-    String? token = await storage.read(key: 'jwt_token');
-    if (token != null) {
-      setState(() {
-        _initialScreen = const MainTabView();
-      });
-    }
-  }
+  const AppWrapper({super.key, required this.startScreen});
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +65,7 @@ class _MyAppState extends State<MyApp> {
           brightness: Brightness.dark,
         ),
         themeMode: ThemeMode.system,
-        home: _initialScreen,
+        home: startScreen, 
       ),
     );
   }

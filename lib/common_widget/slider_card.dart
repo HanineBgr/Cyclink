@@ -25,9 +25,8 @@ class SessionSliderCard extends StatelessWidget {
             context: context,
             builder: (_) => BluetoothPopupDialog(
               onConnected: (trainerId) {
-                Navigator.pop(context); // Fermer le popup
+                Navigator.pop(context); 
 
-                // Aller vers l'écran LiveSession avec l'entraînement sélectionné
                 Navigator.push(
                   context,
                   MaterialPageRoute(

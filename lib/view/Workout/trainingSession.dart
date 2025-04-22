@@ -90,7 +90,7 @@ class _LiveSessionScreenState extends State<LiveSessionScreen> {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: intervals.map((interval) {
           final heightFactor = interval.power / maxPower;
-          final width = interval.duration * 6; // scale for visual clarity
+          final width = interval.duration * 6; 
           final color = Colors.orangeAccent;
           return Container(
             width: width,

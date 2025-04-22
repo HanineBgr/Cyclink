@@ -2,23 +2,25 @@ import 'package:fast_rhino/view/Workout/trainingSession.dart';
 import 'package:fast_rhino/view/planning/planning_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fast_rhino/common/colo_extension.dart';
 import 'package:fast_rhino/view/Workout/workout_library.dart';
 import 'package:fast_rhino/view/home/home_view.dart';
 import 'package:fast_rhino/view/profile/profile_view.dart';
 
 class MainTabView extends StatefulWidget {
-  const MainTabView({super.key});
+  final int initialTabIndex;
+
+  const MainTabView({super.key, this.initialTabIndex = 0});
 
   @override
   State<MainTabView> createState() => _MainTabViewState();
 
-  // 👇 This allows child widgets to access MainTabView's state
   static _MainTabViewState? of(BuildContext context) =>
       context.findAncestorStateOfType<_MainTabViewState>();
 }
 
-class _MainTabViewState extends State<MainTabView> {
+class _MainTabViewState extends State<MainTabView> with WidgetsBindingObserver {
   int selectTab = 0;
   final PageStorageBucket pageBucket = PageStorageBucket();
   late Widget currentTab;
@@ -26,7 +28,48 @@ class _MainTabViewState extends State<MainTabView> {
   @override
   void initState() {
     super.initState();
-    currentTab = const HomeViewScreen();
+    WidgetsBinding.instance.addObserver(this);
+    selectTab = widget.initialTabIndex;
+    currentTab = _getTabForIndex(selectTab);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    if (state == AppLifecycleState.paused) {
+      final prefs = await SharedPreferences.getInstance();
+      final screenName = switch (selectTab) {
+        0 => 'HomeView',
+        1 => 'WorkoutLibrary',
+        2 => 'LiveSession',
+        3 => 'Planning',
+        4 => 'Profile',
+        _ => 'HomeView',
+      };
+      await prefs.setString('lastScreen', screenName);
+    }
+  }
+
+  Widget _getTabForIndex(int index) {
+    switch (index) {
+      case 0:
+        return const HomeViewScreen();
+      case 1:
+        return WorkoutLibrary(eObj: {"name": "Workout Library"});
+      case 2:
+        return const Placeholder(); // Replace with LiveSessionScreen if needed
+      case 3:
+        return PlanningScreen();
+      case 4:
+        return const ProfileView();
+      default:
+        return const HomeViewScreen();
+    }
   }
 
   Widget buildTabIcon(Widget iconWidget, bool isActive, VoidCallback onTap) {
@@ -71,7 +114,7 @@ class _MainTabViewState extends State<MainTabView> {
                 () {
                   setState(() {
                     selectTab = 0;
-                    currentTab = const HomeViewScreen();
+                    currentTab = _getTabForIndex(selectTab);
                   });
                 },
               ),
@@ -84,7 +127,7 @@ class _MainTabViewState extends State<MainTabView> {
                 () {
                   setState(() {
                     selectTab = 1;
-                    currentTab = WorkoutLibrary(eObj: {"name": "Workout Library"});
+                    currentTab = _getTabForIndex(selectTab);
                   });
                 },
               ),
@@ -99,7 +142,7 @@ class _MainTabViewState extends State<MainTabView> {
                 () {
                   setState(() {
                     selectTab = 2;
-                    // currentTab = LiveSessionScreen();
+                    currentTab = _getTabForIndex(selectTab);
                   });
                 },
               ),
@@ -112,7 +155,7 @@ class _MainTabViewState extends State<MainTabView> {
                 () {
                   setState(() {
                     selectTab = 3;
-                    currentTab = PlanningScreen();
+                    currentTab = _getTabForIndex(selectTab);
                   });
                 },
               ),
@@ -125,7 +168,7 @@ class _MainTabViewState extends State<MainTabView> {
                 () {
                   setState(() {
                     selectTab = 4;
-                    currentTab = const ProfileView();
+                    currentTab = _getTabForIndex(selectTab);
                   });
                 },
               ),

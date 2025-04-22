@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../models/Workout/workout.dart';
 
-// 🌍 Base URL à modifier si nécessaire
+// url render ( cloud ) 
 const String baseUrl = 'https://backend-izlg.onrender.com';
 
 class WorkoutProvider with ChangeNotifier {
