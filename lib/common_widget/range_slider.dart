@@ -38,7 +38,6 @@ class _CustomRangeSliderState extends State<CustomRangeSlider> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Title aligned with slider
         Padding(
           padding: const EdgeInsets.only(left: 25.0),
           child: Text(
@@ -54,11 +53,17 @@ class _CustomRangeSliderState extends State<CustomRangeSlider> {
             overlayColor: widget.activeColor.withOpacity(0.1),
             thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
             trackHeight: 4,
+            valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
+            showValueIndicator: ShowValueIndicator.always,
+            valueIndicatorColor: widget.activeColor,
+            valueIndicatorTextStyle: const TextStyle(color: Colors.white),
           ),
           child: Slider(
             value: _currentValue,
             min: widget.min,
             max: widget.max,
+            divisions: (widget.max - widget.min).toInt(),
+            label: _currentValue.toStringAsFixed(0),
             onChanged: (value) {
               setState(() {
                 _currentValue = value;

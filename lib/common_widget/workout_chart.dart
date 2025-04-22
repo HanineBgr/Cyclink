@@ -9,7 +9,7 @@ class WorkoutGraphBar extends StatelessWidget {
   const WorkoutGraphBar({
     super.key,
     required this.intervals,
-    this.maxHeight = 50.0, // default height
+    this.maxHeight = 50.0,
   });
 
   @override
@@ -24,16 +24,24 @@ class WorkoutGraphBar extends StatelessWidget {
           final powerRatio = interval.power / 100.0;
           final barHeight = powerRatio * maxHeight;
           final flex = (interval.duration / totalDuration * 1000).toInt();
-          final color = getZoneColor(interval.power); 
+          final color = getZoneColor(interval.power);
 
           return Expanded(
             flex: flex,
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 1),
-              height: barHeight.clamp(10.0, maxHeight),
+            child: Tooltip(
+              message: "${interval.duration.toStringAsFixed(1)} min - ${interval.power.toInt()}% FTP",
               decoration: BoxDecoration(
-                color: color,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                color: Colors.black87,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              textStyle: const TextStyle(color: Colors.white, fontSize: 12),
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 1),
+                height: barHeight.clamp(10.0, maxHeight),
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                ),
               ),
             ),
           );

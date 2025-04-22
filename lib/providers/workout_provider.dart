@@ -34,6 +34,7 @@ class WorkoutProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+  /// filter workouts by tss / duration 
 Future<void> filterWorkouts({
   required int minTss,
   required int maxTss,

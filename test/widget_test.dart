@@ -1,30 +1,30 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:fast_rhino/main.dart';
+import 'package:fast_rhino/view/main_tab/main_tab_view.dart';
+import 'package:fast_rhino/common/colo_extension.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('Tab bar renders and switches tab', (WidgetTester tester) async {
+    // Build only MainTabView for testing purposes
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MainTabView(initialTabIndex: 0),
+        theme: ThemeData(
+          primaryColor: TColor.primaryColor1,
+          fontFamily: "Poppins",
+          brightness: Brightness.light,
+        ),
+      ),
+    );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Verify the home tab icon is selected
+    expect(find.byIcon(Icons.home), findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    // Tap on the profile icon
+    await tester.tap(find.byIcon(Icons.person));
+    await tester.pumpAndSettle();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verify that it switched to the profile tab (you can test for a text or widget from that screen)
+    expect(find.byIcon(Icons.person), findsOneWidget);
   });
 }

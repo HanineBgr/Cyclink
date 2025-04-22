@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:fast_rhino/common_widget/search_bar.dart';
 import 'package:fast_rhino/common_widget/slider_card.dart';
 import 'package:fast_rhino/common_widget/step_detail_row.dart';
 import 'package:fast_rhino/common_widget/workout_chart.dart';
@@ -6,7 +7,10 @@ import 'package:fast_rhino/helpers/workout_parser.dart';
 import 'package:fast_rhino/models/Workout/interval.dart';
 import 'package:fast_rhino/providers/workout_provider.dart';
 import 'package:fast_rhino/services/bluetooth/bluetooth_service.dart';
+import 'package:fast_rhino/view/Workout/workoutDetail.dart';
+import 'package:fast_rhino/view/Workout/workoutList.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fast_rhino/common_widget/workout_card.dart';
@@ -23,7 +27,7 @@ class WorkoutLibrary extends StatefulWidget {
   State<WorkoutLibrary> createState() => _WorkoutLibraryState();
 }
 
-class _WorkoutLibraryState extends State<WorkoutLibrary> {
+class _WorkoutLibraryState extends State<WorkoutLibrary> with WidgetsBindingObserver {
   TextEditingController txtSearch = TextEditingController();
   final FtmsController ftmsController = FtmsController();
   Workout? selectedWorkout;
@@ -33,14 +37,56 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
   @override
   void initState() {
     super.initState();
-    _saveLastScreen(); // ✅ Sauvegarde du screen
-    Provider.of<WorkoutProvider>(context, listen: false).fetchWorkouts();
+    WidgetsBinding.instance.addObserver(this);
+    Provider.of<WorkoutProvider>(context, listen: false).fetchWorkouts().then((_) {
+      _restoreWorkout();
+    });
     Provider.of<AuthProvider>(context, listen: false).fetchUser();
+    _listenToBackButton();
   }
 
-  Future<void> _saveLastScreen() async {
+  void _listenToBackButton() {
+    SystemChannels.lifecycle.setMessageHandler((msg) async {
+      if (msg == AppLifecycleState.resumed.toString()) {
+        _restoreWorkout();
+      }
+      return null;
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _restoreWorkout();
+    }
+  }
+
+  Future<void> _saveLastScreen(String workoutId) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('lastScreen', 'WorkoutLibrary');
+    await prefs.setString('selectedWorkoutId', workoutId);
+  }
+
+  Future<void> _restoreWorkout() async {
+    final prefs = await SharedPreferences.getInstance();
+    final id = prefs.getString('selectedWorkoutId');
+    if (id != null) {
+      final provider = Provider.of<WorkoutProvider>(context, listen: false);
+      final match = provider.workouts.firstWhere((w) => w.id == id, orElse: () => Workout(id: '', name: '', description: '', durationMinutes: 0, tss: 0, category: '', xml: ''));
+      if (match.id.isNotEmpty) {
+        setState(() {
+          selectedWorkout = match;
+          intervals = parseWorkoutXml(match.xml);
+          _parseEssentialSteps(match.xml);
+        });
+      }
+    }
   }
 
   String _formatTime(int seconds) {
@@ -108,7 +154,9 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
         leading: selectedWorkout != null
             ? IconButton(
                 icon: Icon(Icons.arrow_back, color: TColor.black),
-                onPressed: () {
+                onPressed: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setString('selectedWorkoutId', selectedWorkout!.id);
                   setState(() {
                     selectedWorkout = null;
                     essentialSteps.clear();
@@ -125,169 +173,37 @@ class _WorkoutLibraryState extends State<WorkoutLibrary> {
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                if (selectedWorkout == null) _buildSearchBar(workoutProvider),
+                if (selectedWorkout == null)
+                  WorkoutSearchBar(
+                    controller: txtSearch,
+                    workoutProvider: workoutProvider,
+                  ),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(16),
-                    child: selectedWorkout == null ? _buildWorkoutList(workouts) : _buildWorkoutDetail(context, authProvider.ftp.toDouble()),
+                    child: selectedWorkout == null
+                        ? WorkoutListView(
+                            workouts: workouts,
+                            onSelect: (workout) async {
+                              await _saveLastScreen(workout.id);
+                              setState(() {
+                                selectedWorkout = workout;
+                                intervals = parseWorkoutXml(workout.xml);
+                                _parseEssentialSteps(workout.xml);
+                              });
+                            },
+                          )
+                        : WorkoutDetailView(
+                            workout: selectedWorkout!,
+                            intervals: intervals,
+                            essentialSteps: essentialSteps,
+                            ftp: authProvider.ftp.toDouble(),
+                            ftmsController: ftmsController,
+                          ),
                   ),
                 ),
               ],
             ),
-    );
-  }
-
-  Widget _buildWorkoutList(List<Workout> workouts) {
-    return Column(
-      children: workouts.map((workout) {
-        return GestureDetector(
-          onTap: () {
-            setState(() {
-              selectedWorkout = workout;
-              intervals = parseWorkoutXml(workout.xml);
-              _parseEssentialSteps(workout.xml);
-            });
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: WorkoutCard(workout: workout),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildWorkoutDetail(BuildContext context, double ftp) {
-    double sum4thPower = 0;
-    int totalSeconds = 0;
-
-    for (var interval in intervals) {
-      final watts = (interval.power / 100.0) * ftp;
-      final durationSeconds = (interval.duration * 60).toInt();
-      sum4thPower += durationSeconds * math.pow(watts, 4);
-      totalSeconds += durationSeconds;
-    }
-
-    final np = totalSeconds > 0 ? math.pow(sum4thPower / totalSeconds, 0.25) : 0.0;
-    final ifFactor = ftp > 0 ? np / ftp : 0.0;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 8),
-        ReadMoreText(
-          textAlign: TextAlign.justify,
-          selectedWorkout!.description,
-          colorClickableText: TColor.primaryColor1,
-          style: TextStyle(color: TColor.gray, fontSize: 14),
-        ),
-        const SizedBox(height: 25),
-        WorkoutGraphBar(intervals: intervals),
-        const SizedBox(height: 25),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildMetricTile("Duration", "${selectedWorkout!.durationMinutes} min", Icons.timer),
-            _buildMetricTile("TSS", selectedWorkout!.tss.toString(), Icons.bolt),
-            _buildMetricTile("NP", np.toStringAsFixed(0), Icons.bar_chart),
-            _buildMetricTile("IF", ifFactor.toStringAsFixed(2), Icons.speed),
-          ],
-        ),
-        const SizedBox(height: 30),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text("Workout Structure", style: TextStyle(color: TColor.black, fontSize: 16, fontWeight: FontWeight.w700)),
-            Text("${essentialSteps.length} Steps", style: TextStyle(color: TColor.gray, fontSize: 12)),
-          ],
-        ),
-        const SizedBox(height: 10),
-        ...essentialSteps.asMap().entries.map((entry) {
-          final index = entry.key;
-          final step = entry.value;
-          return StepDetailRow(
-            sObj: {
-              "no": "${index + 1}".padLeft(2, "0"),
-              "title": step["title"]!,
-              "detail": step["detail"]!,
-            },
-            isLast: index == essentialSteps.length - 1,
-          );
-        }).toList(),
-        const SizedBox(height: 25),
-        SessionSliderCard(workout: selectedWorkout!, ftmsController: ftmsController),
-        const SizedBox(height: 20),
-      ],
-    );
-  }
-
-  Widget _buildSearchBar(WorkoutProvider workoutProvider) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        decoration: BoxDecoration(
-          color: TColor.white,
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 2, offset: Offset(0, 1))],
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: txtSearch,
-                onSubmitted: (value) {
-                  final searchText = value.trim();
-                  if (searchText.isNotEmpty) {
-                    workoutProvider.searchWorkoutsByName(searchText);
-                  } else {
-                    workoutProvider.fetchWorkouts();
-                  }
-                },
-                decoration: InputDecoration(
-                  hintText: "Search Workout",
-                  border: InputBorder.none,
-                  prefixIcon: GestureDetector(
-                    onTap: () {
-                      final searchText = txtSearch.text.trim();
-                      if (searchText.isNotEmpty) {
-                        workoutProvider.searchWorkoutsByName(searchText);
-                      } else {
-                        workoutProvider.fetchWorkouts();
-                      }
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Image.asset("assets/img/search.png", width: 25, height: 25),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 8),
-              width: 1,
-              height: 25,
-              color: TColor.gray.withOpacity(0.3),
-            ),
-            InkWell(
-              onTap: () {},
-              child: Image.asset("assets/img/Filter.png", width: 25, height: 25),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMetricTile(String label, String value, IconData icon) {
-    return Column(
-      children: [
-        Icon(icon, color: TColor.primaryColor1),
-        const SizedBox(height: 4),
-        Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: TColor.black)),
-        Text(label, style: TextStyle(fontSize: 13, color: Colors.grey)),
-      ],
     );
   }
 }
