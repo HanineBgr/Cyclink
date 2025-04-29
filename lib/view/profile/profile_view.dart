@@ -2,7 +2,6 @@ import 'package:fast_rhino/view/auth/login_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../common/colo_extension.dart';
 import '../../common_widget/profileCard.dart';
 import '../../common_widget/round_button.dart';
@@ -21,11 +20,10 @@ class _ProfileViewState extends State<ProfileView> {
   @override
   void initState() {
     super.initState();
-    _saveLastScreen(); // ✅ Ajout ici
+    _saveLastScreen(); 
     Provider.of<AuthProvider>(context, listen: false).fetchUser();
   }
 
-  // ✅ Fonction pour sauvegarder le nom de l'écran
   Future<void> _saveLastScreen() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('lastScreen', 'Profile');
