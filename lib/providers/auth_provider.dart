@@ -98,4 +98,7 @@ class AuthProvider with ChangeNotifier {
     await _storage.delete(key: 'token');
     notifyListeners();
   }
+
+  /// Update user data
+  
 }
