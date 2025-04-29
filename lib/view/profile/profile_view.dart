@@ -1,3 +1,4 @@
+import 'package:fast_rhino/view/auth/login_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -45,8 +46,8 @@ class _ProfileViewState extends State<ProfileView> {
         actions: [
           InkWell(
             onTap: () async {
-              await Provider.of<AuthProvider>(context, listen: false).signOut();
-              Navigator.of(context).popUntil((route) => route.isFirst);
+          await Provider.of<AuthProvider>(context, listen: false).signOut();
+          Navigator.of(context).popUntil((route) => route.isFirst);
             },
             child: Container(
               margin: const EdgeInsets.all(8),
