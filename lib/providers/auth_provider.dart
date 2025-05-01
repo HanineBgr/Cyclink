@@ -36,28 +36,35 @@ class AuthProvider with ChangeNotifier {
   }
 
   /// Fetch current user based on saved token
-  Future<void> fetchUser() async {
-    _isLoading = true;
-    notifyListeners();
+  Future<bool> fetchUser() async {
+  _isLoading = true;
+  notifyListeners();
 
-    _token ??= await _storage.read(key: 'token');
+  _token ??= await _storage.read(key: 'token');
 
-    if (_token == null) {
-      _isLoading = false;
-      notifyListeners();
-      throw Exception('Token is null');
-    }
-
-    try {
-      final userData = await AuthService.fetchUser(token: _token!);
-      _user = userData;
-    } catch (e) {
-      print('Fetch user error: $e');
-    }
-
+  if (_token == null) {
     _isLoading = false;
     notifyListeners();
+    _user = null;
+    return false;
   }
+
+  try {
+    final userData = await AuthService.fetchUser(token: _token!);
+    _user = userData;
+    _isLoading = false;
+    notifyListeners();
+    return true;
+  } catch (e) {
+    print('❌ Fetch user error: $e');
+    _user = null;
+    _token = null;
+    await _storage.delete(key: 'token');
+    _isLoading = false;
+    notifyListeners();
+    return false;
+  }
+}
 
   /// Sign Up (token is not returned here, so we don't store it)
   Future<void> signUp({
@@ -100,5 +107,22 @@ class AuthProvider with ChangeNotifier {
   }
 
   /// Update user data
-  
+  Future<bool> updateUserProfile(Map<String, dynamic> updatedFields) async {
+  if (_user == null) return false;
+
+  try {
+    final updatedUser = await AuthService.updateUser(
+      userId: _user!.id,
+      updatedFields: updatedFields,
+    );
+
+    _user = updatedUser;
+    notifyListeners();
+    return true;
+  } catch (e) {
+    print('❌ Failed to update profile: $e');
+    return false;
+  }
+}
+
 }

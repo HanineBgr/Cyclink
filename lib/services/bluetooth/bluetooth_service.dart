@@ -20,12 +20,11 @@ class FtmsController {
     'moxy': [],
   };
 
-  /// Standard BLE service UUIDs
-  static const controllableService = "1826"; // FTMS
-  static const powerMeterService = "1818"; // Cycling Power
-  static const speedCadenceService = "1816"; // Cycling Speed & Cadence
-  static const hrService = "180D"; // Heart Rate
-  static const moxyService = "FE00"; // Custom example (used by MOXY)
+  static const controllableService = "1826";
+  static const powerMeterService = "1818";
+  static const speedCadenceService = "1816";
+  static const hrService = "180D";
+  static const moxyService = "FE00";
 
   void startSmartScan({required void Function(Map<String, List<DiscoveredDevice>>) onUpdate}) {
     categorizedDevices.forEach((key, _) => categorizedDevices[key] = []);
@@ -49,10 +48,7 @@ class FtmsController {
       onUpdate(categorizedDevices);
     });
 
-    // Auto stop after 6 seconds
-    Future.delayed(const Duration(seconds: 6), () {
-      _scanSubscription?.cancel();
-    });
+    Future.delayed(const Duration(seconds: 6), () => _scanSubscription?.cancel());
   }
 
   void _addDevice(String category, DiscoveredDevice device) {
@@ -62,22 +58,17 @@ class FtmsController {
   }
 
   Future<void> connectToTrainer(String deviceId) async {
-    _connectionSubscription = _ble.connectToDevice(id: deviceId).listen(
-      (connectionState) {
-        if (connectionState.connectionState == DeviceConnectionState.connected) {
-          final characteristic = QualifiedCharacteristic(
-            serviceId: Uuid.parse("1826"),
-            characteristicId: Uuid.parse("2AD2"),
-            deviceId: deviceId,
-          );
+    _connectionSubscription = _ble.connectToDevice(id: deviceId).listen((connectionState) {
+      if (connectionState.connectionState == DeviceConnectionState.connected) {
+        final characteristic = QualifiedCharacteristic(
+          serviceId: Uuid.parse("1826"),
+          characteristicId: Uuid.parse("2AD2"),
+          deviceId: deviceId,
+        );
 
-          _powerSubscription = _ble
-              .subscribeToCharacteristic(characteristic)
-              .listen((data) => _parseIndoorBikeData(data));
-        }
-      },
-      onError: (e) => print("Connection error: $e"),
-    );
+        _powerSubscription = _ble.subscribeToCharacteristic(characteristic).listen(_parseIndoorBikeData);
+      }
+    });
   }
 
   void _parseIndoorBikeData(List<int> data) {

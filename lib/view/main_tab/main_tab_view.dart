@@ -62,7 +62,7 @@ class _MainTabViewState extends State<MainTabView> with WidgetsBindingObserver {
       case 1:
         return WorkoutLibrary(eObj: {"name": "Workout Library"});
       case 2:
-        return const Placeholder(); // Replace with LiveSessionScreen if needed
+        return const Placeholder();
       case 3:
         return PlanningScreen();
       case 4:
@@ -72,11 +72,18 @@ class _MainTabViewState extends State<MainTabView> with WidgetsBindingObserver {
     }
   }
 
-  Widget buildTabIcon(Widget iconWidget, bool isActive, VoidCallback onTap) {
-    return IconButton(
-      icon: iconWidget,
-      onPressed: onTap,
-      splashRadius: 24,
+  Widget buildTabItem({required Widget icon, required String label, required bool isActive, required VoidCallback onTap}) {
+    final color = isActive ? TColor.secondaryColor2 : Colors.grey;
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          icon,
+          const SizedBox(height: 2),
+          Text(label, style: TextStyle(fontSize: 10, color: color, fontWeight: FontWeight.w500)),
+        ],
+      ),
     );
   }
 
@@ -101,71 +108,49 @@ class _MainTabViewState extends State<MainTabView> with WidgetsBindingObserver {
               ),
             ],
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              buildTabIcon(
-                Icon(
-                  Icons.home,
-                  color: selectTab == 0 ? TColor.secondaryColor2 : Colors.grey,
-                ),
-                selectTab == 0,
-                () {
+              buildTabItem(
+                icon: Icon(Icons.home, color: selectTab == 0 ? TColor.secondaryColor2 : Colors.grey),
+                label: 'Home',
+                isActive: selectTab == 0,
+                onTap: () {
                   setState(() {
                     selectTab = 0;
                     currentTab = _getTabForIndex(selectTab);
                   });
                 },
               ),
-              buildTabIcon(
-                Icon(
-                  Icons.list_rounded,
-                  color: selectTab == 1 ? TColor.secondaryColor2 : Colors.grey,
-                ),
-                selectTab == 1,
-                () {
+              buildTabItem(
+                icon: Icon(Icons.list_rounded, color: selectTab == 1 ? TColor.secondaryColor2 : Colors.grey),
+                label: 'Workouts',
+                isActive: selectTab == 1,
+                onTap: () {
                   setState(() {
                     selectTab = 1;
                     currentTab = _getTabForIndex(selectTab);
                   });
                 },
               ),
-              buildTabIcon(
-                SvgPicture.asset(
-                  'assets/svg/home_trainer.svg',
-                  color: selectTab == 2 ? TColor.secondaryColor2 : Colors.grey,
-                  width: 28,
-                  height: 28,
-                ),
-                selectTab == 2,
-                () {
-                  setState(() {
-                    selectTab = 2;
-                    currentTab = _getTabForIndex(selectTab);
-                  });
-                },
-              ),
-              buildTabIcon(
-                Icon(
-                  Icons.calendar_month,
-                  color: selectTab == 3 ? TColor.secondaryColor2 : Colors.grey,
-                ),
-                selectTab == 3,
-                () {
+             
+              buildTabItem(
+                icon: Icon(Icons.calendar_month, color: selectTab == 3 ? TColor.secondaryColor2 : Colors.grey),
+                label: 'Planning',
+                isActive: selectTab == 3,
+                onTap: () {
                   setState(() {
                     selectTab = 3;
                     currentTab = _getTabForIndex(selectTab);
                   });
                 },
               ),
-              buildTabIcon(
-                Icon(
-                  Icons.person,
-                  color: selectTab == 4 ? TColor.secondaryColor2 : Colors.grey,
-                ),
-                selectTab == 4,
-                () {
+              buildTabItem(
+                icon: Icon(Icons.person, color: selectTab == 4 ? TColor.secondaryColor2 : Colors.grey),
+                label: 'Profile',
+                isActive: selectTab == 4,
+                onTap: () {
                   setState(() {
                     selectTab = 4;
                     currentTab = _getTabForIndex(selectTab);

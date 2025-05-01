@@ -73,6 +73,32 @@ class AuthService {
       throw Exception(errorData['message'] ?? 'Sign-in failed');
     }
   }
+/// Update user profile
+static Future<User> updateUser({
+  required String userId,
+  required Map<String, dynamic> updatedFields,
+}) async {
+  final token = await _storage.read(key: 'token');
+  final url = Uri.parse('$baseUrl/user/$userId'); // matches /user/:id
+
+  final response = await http.put(
+    url,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+    body: jsonEncode(updatedFields),
+  );
+
+  final responseBody = jsonDecode(response.body);
+
+  if (response.statusCode == 200) {
+    return User.fromJson(responseBody);
+  } else {
+    throw Exception(responseBody['message'] ?? 'Failed to update user');
+  }
+}
+
 
   /// Fetch Current User
   static Future<User> fetchUser({required String token}) async {
@@ -104,4 +130,45 @@ class AuthService {
   static Future<void> signOut() async {
     await _storage.delete(key: 'token');
   }
+
+  /// sign in with strava 
+  /* static Future<User> signInWithStrava() async {
+    const clientId = '156458'; 
+    final redirectUri = '$baseUrl/auth/strava/callback';
+
+    final authUrl = Uri.https("www.strava.com", "/oauth/authorize", {
+      'client_id': clientId,
+      'response_type': 'code',
+      'redirect_uri': redirectUri,
+      'approval_prompt': 'auto',
+      'scope': 'read,activity:read',
+    }).toString();
+
+    try {
+      final result = await FlutterWebAuth.authenticate(
+        url: authUrl,
+        callbackUrlScheme: 'https', 
+      );
+
+      final code = Uri.parse(result).queryParameters['code'];
+      if (code == null) throw Exception("Missing code from redirect");
+
+      final tokenResponse = await http.get(
+        Uri.parse('$baseUrl/auth/strava/callback?code=$code'),
+      );
+
+      if (tokenResponse.statusCode == 200) {
+        final data = json.decode(tokenResponse.body);
+        final token = data['token'];
+
+        await _storage.write(key: 'token', value: token);
+        return User.fromJson(data['user']);
+      } else {
+        final err = json.decode(tokenResponse.body);
+        throw Exception(err['message'] ?? 'Strava login failed');
+      }
+    } catch (e) {
+      throw Exception("Strava auth error: $e");
+    }
+  }*/
 }

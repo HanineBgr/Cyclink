@@ -1,4 +1,5 @@
 import 'package:fast_rhino/view/auth/login_view.dart';
+import 'package:fast_rhino/view/profile/editProfileView.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -44,8 +45,10 @@ class _ProfileViewState extends State<ProfileView> {
         actions: [
           InkWell(
             onTap: () async {
-          await Provider.of<AuthProvider>(context, listen: false).signOut();
-          Navigator.of(context).popUntil((route) => route.isFirst);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginView()),
+              );
             },
             child: Container(
               margin: const EdgeInsets.all(8),
@@ -91,27 +94,18 @@ class _ProfileViewState extends State<ProfileView> {
                             type: RoundButtonType.bgGradient,
                             fontSize: 12,
                             fontWeight: FontWeight.w400,
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => EditProfileScreen(user: user)),
+                              );
+                            },
                           ),
                         )
                       ],
                     ),
                     const SizedBox(height: 15),
-                    Row(
-                      children: [
-                        Expanded(child: TitleSubtitleCell(title: "${user.height}cm", subtitle: "Height")),
-                        const SizedBox(width: 15),
-                        Expanded(child: TitleSubtitleCell(title: "${user.weight}kg", subtitle: "Weight")),
-                        const SizedBox(width: 15),
-                        Expanded(
-                          child: TitleSubtitleCell(
-                            title: "${calculateAge(user.dateOfBirth)}yo",
-                            subtitle: "Age",
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 25),
+
                     Container(
                       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                       decoration: BoxDecoration(
@@ -124,10 +118,32 @@ class _ProfileViewState extends State<ProfileView> {
                         children: [
                           Text("General info", style: TextStyle(color: TColor.black, fontSize: 16, fontWeight: FontWeight.w700)),
                           const SizedBox(height: 8),
-                          SettingRow(icon: "assets/img/p_personal.png", title: "Gender: ${user.gender}", onPressed: () {}),
-                          SettingRow(icon: "assets/img/p_achi.png", title: "FTP: ${user.ftp}w", onPressed: () {}),
-                          SettingRow(icon: "assets/img/p_activity.png", title: "Max HR: ${user.maxHR} bpm", onPressed: () {}),
-                          SettingRow(icon: "assets/img/p_workout.png", title: "Resting HR: ${user.restingHR} bpm", onPressed: () {}),
+                         Row(
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+    Expanded(
+      child: Column(
+        children: [
+          SettingRow(icon: "assets/img/p_personal.png", title: "Gender: ${user.gender}", onPressed: () {}),
+          SettingRow(icon: "assets/img/p_achi.png", title: "FTP: ${user.ftp}w", onPressed: () {}),
+          SettingRow(icon: "assets/img/p_activity.png", title: "Max HR: ${user.maxHR} bpm", onPressed: () {}),
+          SettingRow(icon: "assets/img/p_workout.png", title: "Resting HR: ${user.restingHR} bpm", onPressed: () {}),
+        ],
+      ),
+    ),
+    const SizedBox(width: 10),
+    Expanded(
+      child: Column(
+        children: [
+          SettingRow(icon: "assets/img/hight.png", title: "Height: ${user.height}cm", onPressed: () {}),
+          SettingRow(icon: "assets/img/weight.png", title: "Weight: ${user.weight}kg", onPressed: () {}),
+          SettingRow(icon: "assets/img/date.png", title: "Age: ${calculateAge(user.dateOfBirth)}yo", onPressed: () {}),
+        ],
+      ),
+    ),
+  ],
+),
+
                         ],
                       ),
                     ),

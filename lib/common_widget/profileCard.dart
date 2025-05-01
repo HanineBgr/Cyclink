@@ -116,26 +116,26 @@ class _ProfileCardState extends State<ProfileCard> {
   List<Widget> _buildZoneCards(int ftp, int maxHr) {
     if (isPowerZoneSelected) {
       return [
-        _zoneCard("Z1", "Très facile, conversation fluide. Récupération active", ftp, 0, 55, Colors.blue, Colors.blue[50]!),
-        _zoneCard("Z2", "Effort modéré. Endurance aérobie", ftp, 56, 75, Colors.green, Colors.green[50]!),
-        _zoneCard("Z3", "Effort soutenu. Seuil lactique", ftp, 76, 90, Colors.orange, Colors.orange[50]!),
-        _zoneCard("Z4", "Effort difficile. Seuil anaérobie", ftp, 91, 105, Colors.red, Colors.red[50]!),
-        _zoneCard("Z5", "Très intense. Capacité aérobie maximale", ftp, 106, 120, Colors.purple, Colors.purple[50]!),
-        _zoneCard("Z6", "Maximal court. Tolérance lactique", ftp, 121, 150, Colors.teal, Colors.teal[50]!),
-        _zoneCard("Z7", "Sprints explosifs. Puissance maximale", ftp, 151, 200, Colors.brown, Colors.brown[50]!),
+        _zoneCard("Z1", "Recovery:", "Récupération active", ftp, 0, 55, Colors.blue, Colors.blue[50]!),
+        _zoneCard("Z2", "Endurance:", "Endurance aérobie", ftp, 56, 75, Colors.green, Colors.green[50]!),
+        _zoneCard("Z3", "Tempo:", "Seuil lactique", ftp, 76, 90, Colors.orange, Colors.orange[50]!),
+        _zoneCard("Z4", "Threshold:", "Seuil anaérobie", ftp, 91, 105, Colors.red, Colors.red[50]!),
+        _zoneCard("Z5", "VO2 Max:", "Très intense", ftp, 106, 120, Colors.purple, Colors.purple[50]!),
+        _zoneCard("Z6", "Anaerobic:", "Tolérance lactique", ftp, 121, 150, Colors.brown, Colors.brown[50]!),
+        _zoneCard("Z7", "Neuromuscular:", "Sprints explosifs", ftp, 151, 200, Colors.grey, Colors.grey[50]!),
       ];
     } else {
       return [
-        _zoneCard("Z1", "Très facile. Récupération active", maxHr, 50, 60, Colors.pink, Colors.pink[50]!),
-        _zoneCard("Z2", "Modéré. Endurance aérobie", maxHr, 61, 70, Colors.orange, Colors.orange[50]!),
-        _zoneCard("Z3", "Soutenu. Amélioration du seuil", maxHr, 71, 80, Colors.deepPurple, Colors.deepPurple[50]!),
-        _zoneCard("Z4", "Difficile. Seuil anaérobie", maxHr, 81, 90, Colors.indigo, Colors.indigo[50]!),
-        _zoneCard("Z5", "Très intense. VO2 max", maxHr, 91, 100, Colors.red, Colors.red[50]!),
+        _zoneCard("Z1", "Recovery:", "Récupération active", maxHr, 50, 60, Colors.blue, Colors.blue[50]!),
+        _zoneCard("Z2", "Endurance:", "Endurance aérobie", maxHr, 61, 70, Colors.green, Colors.green[50]!),
+        _zoneCard("Z3", "Tempo:", "Amélioration du seuil", maxHr, 71, 80, Colors.orange, Colors.orange[50]!),
+        _zoneCard("Z4", "Threshold:", "Seuil anaérobie", maxHr, 81, 90, Colors.red, Colors.red[50]!),
+        _zoneCard("Z5", "VO2 Max:", "Très intense. VO2 max", maxHr, 91, 100, Color(0xFFDC143C), Colors.red[50]!),
       ];
     }
   }
 
-  Widget _zoneCard(String index, String description, int base, int minPct, int maxPct, Color titleColor, Color bgColor) {
+  Widget _zoneCard(String index, String title, String description, int base, int minPct, int maxPct, Color titleColor, Color bgColor) {
     final minW = (base * minPct / 100).round();
     final maxW = (base * maxPct / 100).round();
 
@@ -171,21 +171,33 @@ class _ProfileCardState extends State<ProfileCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  description,
-                  style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    color: Colors.grey[700],
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "$title ",
+                        style: GoogleFonts.poppins(
+                          color: titleColor, // ✅ Matches circle color
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      TextSpan(
+                        text: description,
+                        style: GoogleFonts.poppins(
+                          color: Colors.grey[600],
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  "Zone Range: $minPct% - $maxPct%" +
-                      (isPowerZoneSelected ? "  ($minW–$maxW W)" : ""),
+                  "Zone Range: $minPct–$maxPct%" + (isPowerZoneSelected ? "  ($minW–$maxW W)" : ""),
                   style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                    color: titleColor,
+                    fontSize: 11,
+                    color: Colors.grey[700],
                   ),
                 ),
               ],

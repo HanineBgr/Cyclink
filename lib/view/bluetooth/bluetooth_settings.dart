@@ -1,10 +1,9 @@
-import 'package:fast_rhino/services/bluetooth/bluetooth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
+import '../../services/bluetooth/bluetooth_service.dart';
 
 class BluetoothPopupDialog extends StatefulWidget {
   final Function(String trainerId)? onConnected;
-
   const BluetoothPopupDialog({super.key, this.onConnected});
 
   @override
@@ -12,80 +11,45 @@ class BluetoothPopupDialog extends StatefulWidget {
 }
 
 class _BluetoothPopupDialogState extends State<BluetoothPopupDialog> {
-  final FlutterReactiveBle _ble = FlutterReactiveBle();
   final FtmsController ftmsController = FtmsController();
-
   List<DiscoveredDevice> smartTrainers = [];
   List<DiscoveredDevice> heartRateMonitors = [];
-
   bool isScanning = false;
   String? connectedTrainerId;
 
   @override
   void initState() {
     super.initState();
+    _startScan();
   }
 
   void _startScan() {
     setState(() {
+      isScanning = true;
       smartTrainers.clear();
       heartRateMonitors.clear();
-      isScanning = true;
     });
 
-    _ble.scanForDevices(withServices: []).listen((device) {
-      if (device.name.toLowerCase().contains("trainer")) {
-        if (!smartTrainers.any((d) => d.id == device.id)) {
-          setState(() => smartTrainers.add(device));
-        }
-      } else if (device.name.toLowerCase().contains("heart") || device.name.toLowerCase().contains("hr")) {
-        if (!heartRateMonitors.any((d) => d.id == device.id)) {
-          setState(() => heartRateMonitors.add(device));
-        }
-      }
-    });
-
-    Future.delayed(const Duration(seconds: 6), () {
-      setState(() => isScanning = false);
+    ftmsController.startSmartScan(onUpdate: (devices) {
+      setState(() {
+        smartTrainers = devices['controllable'] ?? [];
+        heartRateMonitors = devices['hrm'] ?? [];
+        isScanning = false;
+      });
     });
   }
 
   void _connectTrainer(DiscoveredDevice device) async {
     await ftmsController.connectToTrainer(device.id);
     setState(() => connectedTrainerId = device.id);
-
-    _showMetricsConfirmation(device.name);
+    widget.onConnected?.call(device.id);
+    Navigator.pop(context);
   }
 
-  void _showMetricsConfirmation(String deviceName) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: const Color(0xFF1D2939),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text("Connected!", style: TextStyle(color: Colors.white)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("✅ Connected to $deviceName", style: TextStyle(color: Colors.lightBlueAccent)),
-              const SizedBox(height: 12),
-              const Text("📊 Metrics that will be captured:", style: TextStyle(color: Colors.white)),
-              const SizedBox(height: 8),
-              const Text("• Power (Watts)\n• Cadence (RPM)\n• Heart Rate (bpm)\n• Elapsed Time",
-                  style: TextStyle(color: Colors.white70)),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("OK", style: TextStyle(color: Colors.white)),
-            )
-          ],
-        );
-      },
-    );
+  @override
+  void dispose() {
+    ftmsController.dispose();
+    super.dispose();
   }
 
   @override
@@ -98,11 +62,15 @@ class _BluetoothPopupDialogState extends State<BluetoothPopupDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text("Connect Devices", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text("Connect Devices",
+                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            const Text("You need to connect at least one smart trainer to start your workout.", style: TextStyle(color: Colors.white70), textAlign: TextAlign.center),
+            const Text(
+              "You need to connect at least one smart trainer to start your workout.",
+              style: TextStyle(color: Colors.white70),
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 20),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -114,14 +82,16 @@ class _BluetoothPopupDialogState extends State<BluetoothPopupDialog> {
                 ),
               ],
             ),
-
             const SizedBox(height: 10),
+
             if (isScanning)
               const CircularProgressIndicator()
             else if (smartTrainers.isEmpty && heartRateMonitors.isEmpty)
-              const Text("No devices found. Tap Scan to search.", style: TextStyle(color: Colors.white38)),
+              const Text("No devices found. Tap Scan to search.",
+                  style: TextStyle(color: Colors.white38)),
 
             const SizedBox(height: 10),
+
             ...smartTrainers.map((d) => _deviceTile(d, "Smart Trainer", isMandatory: true)),
             ...heartRateMonitors.map((d) => _deviceTile(d, "Heart Rate Monitor")),
 
@@ -131,7 +101,7 @@ class _BluetoothPopupDialogState extends State<BluetoothPopupDialog> {
               children: [
                 OutlinedButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text("Cancel"),
+                  child: const Text("Cancel", style: TextStyle(color: Colors.white)),
                 ),
                 ElevatedButton(
                   onPressed: connectedTrainerId != null ? () {

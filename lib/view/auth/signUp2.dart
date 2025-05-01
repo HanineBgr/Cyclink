@@ -3,6 +3,7 @@ import 'package:fast_rhino/common_widget/round_button.dart';
 import 'package:fast_rhino/common_widget/round_textfield.dart';
 import 'package:fast_rhino/providers/auth_provider.dart';
 import 'package:fast_rhino/view/auth/login_view.dart';
+import 'package:fast_rhino/view/main_tab/main_tab_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -71,7 +72,7 @@ class _SignUp2ScreenState extends State<SignUp2Screen> {
               Navigator.pop(context);
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (_) => const LoginView()),
+                MaterialPageRoute(builder: (_) => const MainTabView()),
               );
             },
             child: const Text("OK", style: TextStyle(fontSize: 14)),

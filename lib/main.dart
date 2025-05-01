@@ -1,4 +1,5 @@
 import 'package:fast_rhino/providers/workout_provider.dart';
+import 'package:fast_rhino/view/Splash/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
@@ -24,19 +25,28 @@ Future<Widget> _determineInitialScreen() async {
   final token = await storage.read(key: 'token');
 
   if (token != null) {
-    final lastScreen = prefs.getString('lastScreen');
-    final tabIndex = switch (lastScreen) {
-      'Profile' => 4,
-      'WorkoutLibrary' => 1,
-      'Planning' => 3,
-      'HomeView' => 0,
-      _ => 0,
-    };
-    return MainTabView(initialTabIndex: tabIndex);
+    try {
+      // Try fetching the user using the token
+      final authProvider = AuthProvider();
+      await authProvider.fetchUser();
+
+      if (authProvider.user != null) {
+        final lastScreen = prefs.getString('lastScreen');
+        final tabIndex = switch (lastScreen) {
+          'Profile' => 4,
+          'WorkoutLibrary' => 1,
+          'Planning' => 3,
+          'HomeView' => 0,
+          _ => 0,
+        };
+        return MainTabView(initialTabIndex: tabIndex);
+      }
+    } catch (e) {
+      print("❌ Token exists but user fetch failed: $e");
+    }
   }
 
-  // If no token → redirect to login/splash manually later
-  return MainTabView(); // or LoginScreen() if not connected
+  return SplashScreen(); 
 }
 
 class AppWrapper extends StatelessWidget {

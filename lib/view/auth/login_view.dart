@@ -155,13 +155,33 @@ class _LoginViewState extends State<LoginView> {
                     SizedBox(height: media.width * 0.04),
 
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _socialButton("assets/img/google.png"),
-                        SizedBox(width: media.width * 0.04),
-                        _socialButton("assets/img/strava_logo.png"),
-                      ],
-                    ),
+  mainAxisAlignment: MainAxisAlignment.center,
+  children: [
+    // Google button (you can fill in the method later)
+    GestureDetector(
+      onTap: () {
+       
+      },
+      child: _socialButton("assets/img/google.png"),
+    ),
+    SizedBox(width: media.width * 0.04),
+    
+    // Strava button
+    GestureDetector(
+      onTap: () async {
+       /* try {
+          await AuthService.signInWithStrava();
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Strava login failed")),
+          );
+        }*/
+      },
+      child: _socialButton("assets/img/strava_logo.png"),
+    ),
+  ],
+),
+
 
                     SizedBox(height: media.width * 0.04),
                     TextButton(

@@ -130,7 +130,7 @@ class _SignUpViewState extends State<SignUpView> {
                         height: 50,
                         padding: const EdgeInsets.symmetric(horizontal: 15),
                         child: Image.asset(
-                          "assets/img/gender.png",
+                          "assets/img/choosegender.png",
                           width: 20,
                           height: 20,
                           fit: BoxFit.contain,
@@ -147,7 +147,7 @@ class _SignUpViewState extends State<SignUpView> {
                                       value: name,
                                       child: Text(
                                         name,
-                                        style: TextStyle(color: TColor.gray, fontSize: 14),
+                                        style: TextStyle(color: TColor.black, fontSize: 14),
                                       ),
                                     ))
                                 .toList(),
