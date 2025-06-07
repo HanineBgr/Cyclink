@@ -42,7 +42,7 @@ class HomeViewScreen extends StatelessWidget {
             _buildCenteredWidget(
               const Text(
                 'Recent Activities',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold  ),
               ),
               maxWidth,
             ),

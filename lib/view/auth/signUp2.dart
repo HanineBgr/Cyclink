@@ -30,7 +30,7 @@ class _SignUp2ScreenState extends State<SignUp2Screen> {
   final TextEditingController weightController = TextEditingController();
   final TextEditingController heightController = TextEditingController();
   final TextEditingController ftpController = TextEditingController();
-  final TextEditingController maxHrController = TextEditingController(); // ✅ Max HR
+  final TextEditingController maxHrController = TextEditingController(); 
 
   bool isLoading = false;
   String? errorMessage;
