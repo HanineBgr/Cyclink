@@ -231,7 +231,7 @@ class _LoginViewState extends State<LoginView> with SingleTickerProviderStateMix
           title: "Sign up",
           onPressed: () {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Sign up pressed (demo placeholder)')),
+              const SnackBar(content: Text('Please fill all fields')),
             );
           },
         ),

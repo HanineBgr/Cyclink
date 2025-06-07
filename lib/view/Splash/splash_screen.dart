@@ -53,10 +53,19 @@ class _SplashScreenState extends State<SplashScreen>
               const Spacer(flex: 2),
               Column(
                 children: [
+                  SizedBox(
+                    height: 300,
+                    width: 300,
+                    child: Image.asset(
+                      'assets/img/splash.png',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   Text(
-                    "FastRhino",
+                    "Fast Rhino",
                     style: GoogleFonts.poppins(
-                      fontSize: 28,
+                      fontSize:30,
                       fontWeight: FontWeight.bold,
                       color: Colors.black87,
                     ),
@@ -65,7 +74,7 @@ class _SplashScreenState extends State<SplashScreen>
                   Text(
                     "Ride Beyond Limits",
                     style: GoogleFonts.poppins(
-                      fontSize: 14,
+                      fontSize: 15,
                       color: Colors.black54,
                     ),
                   ),

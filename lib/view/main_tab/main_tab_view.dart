@@ -7,6 +7,7 @@ import 'package:fast_rhino/common/colo_extension.dart';
 import 'package:fast_rhino/view/Workout/workout_library.dart';
 import 'package:fast_rhino/view/home/home_view.dart';
 import 'package:fast_rhino/view/profile/profile_view.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 
 class MainTabView extends StatefulWidget {
   final int initialTabIndex;
@@ -60,20 +61,20 @@ class _MainTabViewState extends State<MainTabView> with WidgetsBindingObserver {
       case 0:
         return const HomeViewScreen();
       case 1:
-        return WorkoutLibrary(eObj: {"name": "Workout Library"});
+        return WorkoutLibrary();
       case 2:
         return const Placeholder();
       case 3:
         return PlanningScreen();
       case 4:
-        return const ProfileView();
+        return const ProfileScreen();
       default:
         return const HomeViewScreen();
     }
   }
 
   Widget buildTabItem({required Widget icon, required String label, required bool isActive, required VoidCallback onTap}) {
-    final color = isActive ? TColor.secondaryColor2 : Colors.grey;
+    final color = isActive ? TColor.primaryColor1 : Colors.grey;
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -92,74 +93,26 @@ class _MainTabViewState extends State<MainTabView> with WidgetsBindingObserver {
     return Scaffold(
       backgroundColor: TColor.white,
       body: PageStorage(bucket: pageBucket, child: currentTab),
-      bottomNavigationBar: SafeArea(
-        child: Container(
-          decoration: BoxDecoration(
-            color: TColor.white,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 6,
-                offset: const Offset(0, -2),
-              ),
-            ],
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              buildTabItem(
-                icon: Icon(Icons.home, color: selectTab == 0 ? TColor.secondaryColor2 : Colors.grey),
-                label: 'Home',
-                isActive: selectTab == 0,
-                onTap: () {
-                  setState(() {
-                    selectTab = 0;
-                    currentTab = _getTabForIndex(selectTab);
-                  });
-                },
-              ),
-              buildTabItem(
-                icon: Icon(Icons.list_rounded, color: selectTab == 1 ? TColor.secondaryColor2 : Colors.grey),
-                label: 'Workouts',
-                isActive: selectTab == 1,
-                onTap: () {
-                  setState(() {
-                    selectTab = 1;
-                    currentTab = _getTabForIndex(selectTab);
-                  });
-                },
-              ),
-             
-              buildTabItem(
-                icon: Icon(Icons.calendar_month, color: selectTab == 3 ? TColor.secondaryColor2 : Colors.grey),
-                label: 'Planning',
-                isActive: selectTab == 3,
-                onTap: () {
-                  setState(() {
-                    selectTab = 3;
-                    currentTab = _getTabForIndex(selectTab);
-                  });
-                },
-              ),
-              buildTabItem(
-                icon: Icon(Icons.person, color: selectTab == 4 ? TColor.secondaryColor2 : Colors.grey),
-                label: 'Profile',
-                isActive: selectTab == 4,
-                onTap: () {
-                  setState(() {
-                    selectTab = 4;
-                    currentTab = _getTabForIndex(selectTab);
-                  });
-                },
-              ),
-            ],
-          ),
-        ),
+      bottomNavigationBar: CurvedNavigationBar(
+        index: selectTab,
+        height: 50.0,
+        backgroundColor: Colors.transparent,
+        color: TColor.primaryColor1,
+        buttonBackgroundColor: TColor.primaryColor1,
+        animationCurve: Curves.easeInOut,
+        animationDuration: const Duration(milliseconds: 400),
+        items: <Widget>[
+          Icon(Icons.home, size: 30, color: Colors.white),
+          Icon(Icons.list_rounded, size: 30, color: Colors.white),
+          Icon(Icons.calendar_month, size: 30, color: Colors.white),
+          Icon(Icons.person, size: 30, color: Colors.white),
+        ],
+        onTap: (index) {
+          setState(() {
+            selectTab = index;
+            currentTab = _getTabForIndex(selectTab);
+          });
+        },
       ),
     );
   }

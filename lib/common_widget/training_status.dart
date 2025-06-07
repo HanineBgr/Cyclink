@@ -24,7 +24,7 @@ class TrainingStatus extends StatelessWidget {
               SizedBox(width: 8),
               Expanded(child: LoadStatusCard(label: 'Fatigue (ATL)', value: '200')),
               SizedBox(width: 8),
-              Expanded(child: LoadStatusCard(label: 'Form (TSB)', value: '50')),
+              Expanded(child: LoadStatusCard(label: 'Form \n(TSB)', value: '50')),
               SizedBox(width: 8),
               Expanded(child: LoadStatusCard(label: 'Current status', value: 'Neutral')),
             ],
@@ -44,9 +44,8 @@ class LoadStatusCard extends StatelessWidget {
   Color _getBackgroundColor() {
     if (label == 'Fitness (CTL)') return Color.fromARGB(255, 227, 243, 255);
     if (label == 'Fatigue (ATL)') return Color.fromARGB(255, 247, 224, 226);
-    if (label == 'Form (TSB)') {
-      double tsbValue = double.tryParse(value) ?? 0.0;
-      return tsbValue > 0 ? Color.fromARGB(255, 229, 248, 229) : Colors.orange.shade100;
+    if (label.replaceAll('\n', ' ') == 'Form (TSB)') {
+      return Color.fromARGB(255, 229, 248, 229);
     }
     return Color.fromARGB(255, 254, 252, 225);
   }
@@ -54,9 +53,8 @@ class LoadStatusCard extends StatelessWidget {
   Color _getTextColor() {
     if (label == 'Fitness (CTL)') return Colors.blue.shade800;
     if (label == 'Fatigue (ATL)') return Colors.red.shade800;
-    if (label == 'Form (TSB)') {
-      double tsbValue = double.tryParse(value) ?? 0.0;
-      return tsbValue > 0 ? Colors.green.shade800 : Colors.orange.shade800;
+    if (label.replaceAll('\n', ' ') == 'Form (TSB)') {
+      return Colors.green.shade800;
     }
     return Colors.orange.shade800;
   }

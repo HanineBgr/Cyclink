@@ -1,19 +1,16 @@
-import 'package:fast_rhino/helpers/power_zone.dart';
-
-
 class WorkoutInterval {
+  final int duration; // in minutes
+  final int power;    // as a percentage of FTP
   final String type;
-  final double duration; // en minutes
-  final double power; // moyenne % FTP
-  final PowerZone zone;
-  final double startPower;
-  final double endPower;
+  final String zone;
+  final int startPower;
+  final int endPower;
   final bool isRamp;
 
   WorkoutInterval({
-    required this.type,
     required this.duration,
     required this.power,
+    required this.type,
     required this.zone,
     required this.startPower,
     required this.endPower,

@@ -16,7 +16,7 @@ class HomeViewScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
-    final userName = authProvider.user?.name ?? 'Rhino boss';
+    final userName = authProvider.user?.name ?? 'Hanine';
 
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
@@ -91,7 +91,7 @@ class HomeViewScreen extends StatelessWidget {
           await _saveLastScreen(); // ✅ Sauvegarde avant d'aller au profil
           MainTabView.of(context)?.setState(() {
             MainTabView.of(context)!.selectTab = 4;
-            MainTabView.of(context)!.currentTab = const ProfileView();
+            MainTabView.of(context)!.currentTab = const ProfileScreen();
           });
         },
         child: const CircleAvatar(

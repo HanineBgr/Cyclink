@@ -112,22 +112,6 @@ class PerformanceChart extends StatelessWidget {
                   ),
                 ),
                 borderData: FlBorderData(show: false),
-                extraLinesData: ExtraLinesData(
-                  horizontalLines: [
-                    HorizontalLine(
-                      y: midY,
-                      color: Colors.grey.withOpacity(0.3),
-                      strokeWidth: 1,
-                      dashArray: [5, 5],
-                      label: HorizontalLineLabel(
-                        show: true,
-                        alignment: Alignment.centerRight,
-                        style: TextStyle(fontSize: 10, color: Colors.black45),
-                        labelResolver: (line) => 'Mid',  
-                      ),
-                    ),
-                  ],
-                ),
                 lineBarsData: [
                   LineChartBarData(
                     isCurved: true,
@@ -152,6 +136,8 @@ class PerformanceChart extends StatelessWidget {
                   ),
                 ],
               ),
+              duration: const Duration(milliseconds: 900),
+              curve: Curves.easeInOut,
             ),
           ),
         ],

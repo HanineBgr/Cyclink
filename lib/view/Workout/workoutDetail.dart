@@ -1,9 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:fast_rhino/common/colo_extension.dart';
-import 'package:fast_rhino/common_widget/workoutButton.dart';
 import 'package:fast_rhino/common_widget/step_detail_row.dart';
-import 'package:fast_rhino/common_widget/workout_chart.dart';
 import 'package:fast_rhino/models/Workout/interval.dart';
 import 'package:fast_rhino/models/Workout/workout.dart';
 import 'package:fast_rhino/services/bluetooth/bluetooth_service.dart';
@@ -52,7 +50,7 @@ class WorkoutDetailView extends StatelessWidget {
           style: TextStyle(color: TColor.gray, fontSize: 14),
         ),
         const SizedBox(height: 25),
-        WorkoutGraphBar(intervals: intervals),
+       // WorkoutGraphBar(intervals: intervals),
         const SizedBox(height: 25),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -85,7 +83,7 @@ class WorkoutDetailView extends StatelessWidget {
           );
         }).toList(),
         const SizedBox(height: 25),
-        startWorkoutButton(workout: workout, ftmsController: ftmsController),
+        //startWorkoutButton(workout: workout, ftmsController: ftmsController),
         const SizedBox(height: 20),
       ],
     );
