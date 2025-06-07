@@ -1,8 +1,6 @@
 import 'package:fast_rhino/common/colo_extension.dart';
-import 'package:fast_rhino/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 
 class ProfileCard extends StatefulWidget {
   const ProfileCard({Key? key}) : super(key: key);
@@ -14,13 +12,12 @@ class ProfileCard extends StatefulWidget {
 class _ProfileCardState extends State<ProfileCard> {
   bool isPowerZoneSelected = true;
 
+  // Static values for FTP and max HR
+  final int ftp = 200;
+  final int maxHr = 180;
+
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
-    final user = authProvider.user;
-    final ftp = user?.ftp ?? 200;
-    final maxHr = user?.maxHR ?? 180;
-
     return Center(
       child: SizedBox(
         width: MediaQuery.of(context).size.width * 0.95,

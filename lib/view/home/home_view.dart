@@ -1,22 +1,16 @@
 import 'package:fast_rhino/common_widget/tss_chart.dart';
-import 'package:fast_rhino/providers/auth_provider.dart';
 import 'package:fast_rhino/view/main_tab/main_tab_view.dart';
 import 'package:fast_rhino/view/profile/profile_view.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../common_widget/performance_chart.dart';
 import '../../common_widget/recent_activities.dart';
 import '../../common_widget/training_status.dart';
-
+import '../../common/colo_extension.dart';
 class HomeViewScreen extends StatelessWidget {
   const HomeViewScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
-    final userName = authProvider.user?.name ?? 'Hanine';
 
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
@@ -28,10 +22,20 @@ class HomeViewScreen extends StatelessWidget {
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: paddingValue, vertical: 16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             SizedBox(height: screenHeight * 0.05),
-            _buildHeader(context, userName),
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: Colors.white,
+                  radius: 20,
+                  backgroundImage: AssetImage('assets/img/user.png'),
+                ),
+                SizedBox(width: 10),
+                Text("Welcome Hanine 👋", style: TextStyle(color: TColor.black, fontSize: 20, fontWeight: FontWeight.w700)),
+              ],
+            ),
             SizedBox(height: screenHeight * 0.02),
             _buildCenteredWidget(TrainingStatus(), maxWidth),
             SizedBox(height: screenHeight * 0.02),
@@ -84,30 +88,5 @@ class HomeViewScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, String userName) {
-    return ListTile(
-      leading: GestureDetector(
-        onTap: () async {
-          await _saveLastScreen(); // ✅ Sauvegarde avant d'aller au profil
-          MainTabView.of(context)?.setState(() {
-            MainTabView.of(context)!.selectTab = 4;
-            MainTabView.of(context)!.currentTab = const ProfileScreen();
-          });
-        },
-        child: const CircleAvatar(
-          backgroundImage: AssetImage('assets/img/user.png'),
-          backgroundColor: Color.fromARGB(0, 255, 244, 244),
-        ),
-      ),
-      title: Text(
-        'Welcome $userName!',
-        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
 
-  Future<void> _saveLastScreen() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('lastScreen', 'HomeView');
-  }
 }

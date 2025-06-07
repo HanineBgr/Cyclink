@@ -127,7 +127,7 @@ class WorkoutLibrary extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Workout Library', style: TextStyle(fontWeight: FontWeight.bold , fontSize: 20)),
+        title: Text("Workout Library", style: TextStyle(color: TColor.black, fontSize: 16, fontWeight: FontWeight.w700)),
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
@@ -335,9 +335,11 @@ class WorkoutDetailViewWithChartAndButton extends StatelessWidget {
         const SizedBox(height: 20),
         Center(
           child: RoundButton(
-  title: "Start Workout",
-  onPressed: () {  },
-)
+            title: "Start Workout",
+            onPressed: () {
+             
+            },
+          ),
         ),
       ],
     );

@@ -63,9 +63,9 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    "Fast Rhino",
+                    "Cyclink",
                     style: GoogleFonts.poppins(
-                      fontSize:30,
+                      fontSize:32,
                       fontWeight: FontWeight.bold,
                       color: Colors.black87,
                     ),

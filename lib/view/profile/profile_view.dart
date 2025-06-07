@@ -1,195 +1,147 @@
+import 'package:fast_rhino/view/auth/login_view.dart';
 import 'package:flutter/material.dart';
+import '../../common/colo_extension.dart';
+import '../../common_widget/profileCard.dart';
+import '../../common_widget/round_button.dart';
+import '../../common_widget/setting_row.dart';
 
-class ProfileScreen extends StatelessWidget {
-const ProfileScreen({super.key});
+class ProfileView extends StatefulWidget {
+  const ProfileView({super.key});
+
+  @override
+  State<ProfileView> createState() => _ProfileViewState();
+}
+
+class _ProfileViewState extends State<ProfileView> {
+  // Static user data
+  final String userName = "Hanine";
+  final String userEmail = "bouguerrahanine4@gmail.com";
+  final String userGender = "Female";
+  final int userFTP = 250;
+  final int userMaxHR = 180;
+  final int userRestingHR = 60;
+  final int userHeight = 175;
+  final int userWeight = 70;
+  final int userAge = 30;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+ 
+
   @override
   Widget build(BuildContext context) {
-    final Color accentColor = Color(0xFF8EC5FC);
-
     return Scaffold(
-      backgroundColor: Color(0xFFF8F8F8),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+      appBar: AppBar(
+        backgroundColor: TColor.white,
+        centerTitle: true,
+        elevation: 0,
+        leadingWidth: 0,
+        title: Text("Profile", style: TextStyle(color: TColor.black, fontSize: 16, fontWeight: FontWeight.w700)),
+        actions: [
+          InkWell(
+            onTap: () async {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginView()),
+              );
+            },
+            child: Container(
+              margin: const EdgeInsets.all(8),
+              height: 40,
+              width: 40,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(color: TColor.lightGray, borderRadius: BorderRadius.circular(10)),
+              child: const Icon(Icons.logout, color: Colors.black, size: 20),
+            ),
+          )
+        ],
+      ),
+      backgroundColor: TColor.white,
+      body: SingleChildScrollView(
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 25),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Profile Header
               Row(
                 children: [
-                  CircleAvatar(
-                    radius: 32,
-                    backgroundImage: AssetImage('assets/profile_avatar.png'), // Replace with your asset
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(30),
+                    child: Image.asset("assets/img/user.png", width: 50, height: 50, fit: BoxFit.cover),
                   ),
-                  SizedBox(width: 16),
+                  const SizedBox(width: 15),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Stefani Wong", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.black)),
-                        SizedBox(height: 4),
-                        Text("Lose a Fat Program", style: TextStyle(fontSize: 13, color: Colors.black54)),
+                        Text(userName, style: TextStyle(color: TColor.black, fontSize: 14, fontWeight: FontWeight.w500)),
+                        Text(userEmail, style: TextStyle(color: TColor.gray, fontSize: 12)),
                       ],
                     ),
                   ),
-                  ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: accentColor,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                      padding: EdgeInsets.symmetric(horizontal: 22, vertical: 8),
-                      elevation: 0,
+                  SizedBox(
+                    width: 70,
+                    height: 25,
+                    child: RoundButton(
+                      title: "Edit",
+                      type: RoundButtonType.bgGradient,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                      onPressed: () {
+                        // Handle edit button press
+                      },
                     ),
-                    child: Text("Edit", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-                  ),
+                  )
                 ],
               ),
-              SizedBox(height: 22),
-
-              // Stats Row
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _ProfileStat(title: "Height", value: "180cm"),
-                  _ProfileStat(title: "Weight", value: "65kg"),
-                  _ProfileStat(title: "Age", value: "22yo"),
-                ],
-              ),
-              SizedBox(height: 22),
-
-              // Account Section
-              _ProfileSection(
-                title: "Account",
-                items: [
-                  _ProfileSectionItem(icon: Icons.person_outline, label: "Personal Data"),
-                  _ProfileSectionItem(icon: Icons.emoji_events_outlined, label: "Achievement"),
-                  _ProfileSectionItem(icon: Icons.history, label: "Activity History"),
-                  _ProfileSectionItem(icon: Icons.bar_chart, label: "Workout Progress"),
-                ],
-              ),
-              SizedBox(height: 18),
-
-              // Notification Section
-              _ProfileSection(
-                title: "Notification",
-                items: [
-                  _ProfileSectionItem(
-                    icon: Icons.notifications_outlined,
-                    label: "Pop-up Notification",
-                    trailing: Switch(
-                      value: true,
-                      onChanged: (v) {},
-                      activeColor: accentColor,
+              const SizedBox(height: 15),
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                decoration: BoxDecoration(
+                  color: TColor.white,
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 2)],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("General info", style: TextStyle(color: TColor.black, fontSize: 16, fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 8),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            children: [
+                              SettingRow(icon: "assets/img/p_personal.png", title: "Gender: $userGender", onPressed: () {}),
+                              SettingRow(icon: "assets/img/p_achi.png", title: "FTP: ${userFTP}w", onPressed: () {}),
+                            
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            children: [
+                                SettingRow(icon: "assets/img/p_activity.png", title: "Max HR: ${userMaxHR} bpm", onPressed: () {}),
+                              SettingRow(icon: "assets/img/p_workout.png", title: "Resting HR: ${userRestingHR} bpm", onPressed: () {}),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-              SizedBox(height: 18),
-
-              // Other Section
-              _ProfileSection(
-                title: "Other",
-                items: [
-                  _ProfileSectionItem(icon: Icons.mail_outline, label: "Contact Us"),
-                  _ProfileSectionItem(icon: Icons.privacy_tip_outlined, label: "Privacy Policy"),
-                  _ProfileSectionItem(icon: Icons.settings_outlined, label: "Settings"),
-                ],
-              ),
+              const SizedBox(height: 25),
+              const ProfileCard(),
             ],
           ),
         ),
       ),
-    );
-  }
-}
-
-class _ProfileStat extends StatelessWidget {
-  final String title;
-  final String value;
-  const _ProfileStat({required this.title, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 90,
-      padding: EdgeInsets.symmetric(vertical: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Text(value, style: TextStyle(color: Color(0xFF8EC5FC), fontWeight: FontWeight.bold, fontSize: 16)),
-          SizedBox(height: 4),
-          Text(title, style: TextStyle(color: Colors.black45, fontSize: 13)),
-        ],
-      ),
-    );
-  }
-}
-
-class _ProfileSection extends StatelessWidget {
-  final String title;
-  final List<_ProfileSectionItem> items;
-  const _ProfileSection({required this.title, required this.items});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 2),
-      padding: EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-          ...items.map((item) => item).toList(),
-        ],
-      ),
-    );
-  }
-}
-
-class _ProfileSectionItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Widget? trailing;
-  const _ProfileSectionItem({required this.icon, required this.label, this.trailing});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: EdgeInsets.only(left: 0, right: 0),
-      leading: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: Color(0xFFF6F6F6),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Icon(icon, color: Color(0xFF8EC5FC)),
-      ),
-      title: Text(label, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-      trailing: trailing ??
-          Icon(Icons.chevron_right, color: Colors.black26),
-      onTap: () {},
     );
   }
 }

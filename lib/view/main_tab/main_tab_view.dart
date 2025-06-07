@@ -1,13 +1,10 @@
-import 'package:fast_rhino/view/Workout/trainingSession.dart';
 import 'package:fast_rhino/view/planning/planning_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fast_rhino/common/colo_extension.dart';
 import 'package:fast_rhino/view/Workout/workout_library.dart';
 import 'package:fast_rhino/view/home/home_view.dart';
-import 'package:fast_rhino/view/profile/profile_view.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:fast_rhino/view/profile/profile_view.dart';
 
 class MainTabView extends StatefulWidget {
   final int initialTabIndex;
@@ -16,12 +13,9 @@ class MainTabView extends StatefulWidget {
 
   @override
   State<MainTabView> createState() => _MainTabViewState();
-
-  static _MainTabViewState? of(BuildContext context) =>
-      context.findAncestorStateOfType<_MainTabViewState>();
 }
 
-class _MainTabViewState extends State<MainTabView> with WidgetsBindingObserver {
+class _MainTabViewState extends State<MainTabView> {
   int selectTab = 0;
   final PageStorageBucket pageBucket = PageStorageBucket();
   late Widget currentTab;
@@ -29,31 +23,8 @@ class _MainTabViewState extends State<MainTabView> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     selectTab = widget.initialTabIndex;
     currentTab = _getTabForIndex(selectTab);
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) async {
-    if (state == AppLifecycleState.paused) {
-      final prefs = await SharedPreferences.getInstance();
-      final screenName = switch (selectTab) {
-        0 => 'HomeView',
-        1 => 'WorkoutLibrary',
-        2 => 'LiveSession',
-        3 => 'Planning',
-        4 => 'Profile',
-        _ => 'HomeView',
-      };
-      await prefs.setString('lastScreen', screenName);
-    }
   }
 
   Widget _getTabForIndex(int index) {
@@ -63,11 +34,10 @@ class _MainTabViewState extends State<MainTabView> with WidgetsBindingObserver {
       case 1:
         return WorkoutLibrary();
       case 2:
-        return const Placeholder();
+        return const PlanningScreen();
       case 3:
-        return PlanningScreen();
-      case 4:
-        return const ProfileScreen();
+        return ProfileView();
+     
       default:
         return const HomeViewScreen();
     }
