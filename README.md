@@ -1,16 +1,14 @@
-# Cyclink
+# 📖 Overview 
 
-A new Flutter project.
+Cyclink is an innovative app designed to enhance your indoor cycling experience by seamlessly connecting with home trainers. Whether you're a casual cyclist or a dedicated enthusiast, Cyclink makes your workouts more engaging, efficient, and enjoyable.
 
-## Getting Started
+## ✨ Features
 
-This project is a starting point for a Flutter application.
+- **Trainer Integration** : Syncs with various home trainers (smart trainers, resistance bikes, etc.) to track performance data in real-time.
+- **Custom Workouts** : Tailor your biking sessions with custom workout plans and training modes for all levels.
+- **Live Stats** : Display key metrics like speed, distance, cadence, power, and heart rate to track your progress.
 
-A few resources to get you started if this is your first Flutter project:
+## 🛠 Tech Stack 
+- **Framework** : Flutter (Frontend) 
+- **Language** : Dart 
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
