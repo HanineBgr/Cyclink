@@ -12,3 +12,5 @@ Cyclink is an innovative app designed to enhance your indoor cycling experience 
 - **Framework** : Flutter (Frontend) 
 - **Language** : Dart 
 
+## 🎥 Demo Video
+<video src="assets/videos/demo.mp4" controls width="600"></video>
