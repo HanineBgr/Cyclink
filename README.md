@@ -13,4 +13,4 @@ Cyclink is an innovative app designed to enhance your indoor cycling experience 
 - **Language** : Dart 
 
 ## 🎥 Demo Video
-<video src="assets/videos/demo.mp4" controls width="600"></video>
+<video src="assets/videos/cyclink.mp4" controls width="600"></video>
